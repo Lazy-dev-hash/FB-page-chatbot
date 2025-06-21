@@ -1,0 +1,381 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Settings</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .settings-grid {
+            display: grid;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .settings-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .settings-section h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-info {
+            flex: 1;
+        }
+        
+        .setting-label {
+            color: white;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .setting-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        .setting-control {
+            margin-left: 20px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-switch.active {
+            background: #4CAF50;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(30px);
+        }
+        
+        .input-field {
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            min-width: 200px;
+        }
+        
+        .textarea-field {
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            min-width: 300px;
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .save-button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .save-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .reset-button {
+            padding: 12px 30px;
+            background: rgba(244, 67, 54, 0.8);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-left: 15px;
+        }
+        
+        .reset-button:hover {
+            transform: translateY(-2px);
+            background: rgba(244, 67, 54, 1);
+        }
+        
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .status-success {
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+        }
+        
+        .status-error {
+            background: rgba(244, 67, 54, 0.8);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ Bot Settings</h1>
+            <p>Configure your bot's behavior and preferences</p>
+        </div>
+        
+        <div class="nav-menu">
+            <div class="nav-links">
+                <a href="/" class="nav-link">📊 Dashboard</a>
+                <a href="/analytics" class="nav-link">📈 Analytics</a>
+                <a href="/users" class="nav-link">👥 Users</a>
+                <a href="/logs" class="nav-link">📋 Logs</a>
+                <a href="/settings" class="nav-link active">⚙️ Settings</a>
+                <a href="/test" class="nav-link">🧪 Test Bot</a>
+            </div>
+        </div>
+        
+        <div class="settings-grid">
+            <div class="settings-section">
+                <h3>🤖 Bot Behavior</h3>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Auto Respond</div>
+                        <div class="setting-description">Automatically respond to incoming messages</div>
+                    </div>
+                    <div class="setting-control">
+                        <div class="toggle-switch <%= config.autoRespond ? 'active' : '' %>" onclick="toggleSetting('autoRespond')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Typing Indicator</div>
+                        <div class="setting-description">Show typing indicator when processing messages</div>
+                    </div>
+                    <div class="setting-control">
+                        <div class="toggle-switch <%= config.enableTypingIndicator ? 'active' : '' %>" onclick="toggleSetting('enableTypingIndicator')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Analytics</div>
+                        <div class="setting-description">Enable detailed analytics and tracking</div>
+                    </div>
+                    <div class="setting-control">
+                        <div class="toggle-switch <%= config.enableAnalytics ? 'active' : '' %>" onclick="toggleSetting('enableAnalytics')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Debug Mode</div>
+                        <div class="setting-description">Enable debug logging for troubleshooting</div>
+                    </div>
+                    <div class="setting-control">
+                        <div class="toggle-switch <%= config.debugMode ? 'active' : '' %>" onclick="toggleSetting('debugMode')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3>⏱️ Performance Settings</h3>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Response Timeout</div>
+                        <div class="setting-description">Maximum time to wait for AI response (milliseconds)</div>
+                    </div>
+                    <div class="setting-control">
+                        <input type="number" class="input-field" id="responseTimeout" value="<%= config.responseTimeout %>" min="5000" max="60000" step="1000">
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Max Message Length</div>
+                        <div class="setting-description">Maximum allowed message length</div>
+                    </div>
+                    <div class="setting-control">
+                        <input type="number" class="input-field" id="maxMessageLength" value="<%= config.maxMessageLength %>" min="100" max="5000" step="100">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3>💬 Custom Messages</h3>
+                
+                <div class="setting-item" style="flex-direction: column; align-items: stretch;">
+                    <div class="setting-info" style="margin-bottom: 15px;">
+                        <div class="setting-label">Custom Greeting</div>
+                        <div class="setting-description">The greeting message that guides the AI's responses</div>
+                    </div>
+                    <div class="setting-control" style="margin-left: 0;">
+                        <textarea class="textarea-field" id="customGreeting" style="width: 100%;"><%= config.customGreeting %></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <button class="save-button" onclick="saveSettings()">💾 Save Settings</button>
+            <button class="reset-button" onclick="resetSettings()">🔄 Reset to Defaults</button>
+        </div>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <div class="buttons" style="margin-top: 30px;">
+            <a href="/" class="btn btn-primary">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <script>
+        let currentConfig = <%= JSON.stringify(config) %>;
+        
+        function toggleSetting(setting) {
+            currentConfig[setting] = !currentConfig[setting];
+            
+            // Update visual state
+            const toggle = event.currentTarget;
+            if (currentConfig[setting]) {
+                toggle.classList.add('active');
+            } else {
+                toggle.classList.remove('active');
+            }
+        }
+        
+        async function saveSettings() {
+            // Get updated values from inputs
+            currentConfig.responseTimeout = parseInt(document.getElementById('responseTimeout').value);
+            currentConfig.maxMessageLength = parseInt(document.getElementById('maxMessageLength').value);
+            currentConfig.customGreeting = document.getElementById('customGreeting').value;
+            
+            try {
+                const response = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentConfig)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('Settings saved successfully!', 'success');
+                } else {
+                    showStatus('Failed to save settings: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Network error occurred', 'error');
+            }
+        }
+        
+        function resetSettings() {
+            if (!confirm('Are you sure you want to reset all settings to defaults?')) return;
+            
+            const defaults = {
+                maxMessageLength: 2000,
+                responseTimeout: 30000,
+                enableTypingIndicator: true,
+                autoRespond: true,
+                customGreeting: "Hello! I'm your AI assistant powered by Gemini. How can I help you today?",
+                enableAnalytics: true,
+                debugMode: false
+            };
+            
+            currentConfig = defaults;
+            
+            // Update UI
+            document.getElementById('responseTimeout').value = defaults.responseTimeout;
+            document.getElementById('maxMessageLength').value = defaults.maxMessageLength;
+            document.getElementById('customGreeting').value = defaults.customGreeting;
+            
+            // Update toggles
+            document.querySelectorAll('.toggle-switch').forEach((toggle, index) => {
+                const settings = ['autoRespond', 'enableTypingIndicator', 'enableAnalytics', 'debugMode'];
+                if (defaults[settings[index]]) {
+                    toggle.classList.add('active');
+                } else {
+                    toggle.classList.remove('active');
+                }
+            });
+            
+            showStatus('Settings reset to defaults', 'success');
+        }
+        
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Validate inputs
+        document.getElementById('responseTimeout').addEventListener('input', function() {
+            if (this.value < 5000) this.value = 5000;
+            if (this.value > 60000) this.value = 60000;
+        });
+        
+        document.getElementById('maxMessageLength').addEventListener('input', function() {
+            if (this.value < 100) this.value = 100;
+            if (this.value > 5000) this.value = 5000;
+        });
+    </script>
+</body>
+</html>

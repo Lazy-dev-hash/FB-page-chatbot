@@ -1,0 +1,255 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Analytics</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .chart-card h3 {
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .insights-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .insight-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .insight-item:last-child {
+            border-bottom: none;
+        }
+        
+        .insight-label {
+            color: white;
+            font-weight: 500;
+        }
+        
+        .insight-value {
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📈 Advanced Analytics</h1>
+            <p>Deep insights into your bot's performance and user engagement</p>
+        </div>
+        
+        <div class="nav-menu">
+            <div class="nav-links">
+                <a href="/" class="nav-link">📊 Dashboard</a>
+                <a href="/analytics" class="nav-link active">📈 Analytics</a>
+                <a href="/users" class="nav-link">👥 Users</a>
+                <a href="/logs" class="nav-link">📋 Logs</a>
+                <a href="/settings" class="nav-link">⚙️ Settings</a>
+                <a href="/test" class="nav-link">🧪 Test Bot</a>
+            </div>
+        </div>
+        
+        <div class="analytics-grid">
+            <div class="chart-card">
+                <h3>⏰ Response Time Trends</h3>
+                <canvas id="responseTimeChart"></canvas>
+            </div>
+            
+            <div class="chart-card">
+                <h3>✅ Success Rate Analysis</h3>
+                <canvas id="successRateChart"></canvas>
+            </div>
+            
+            <div class="chart-card">
+                <h3>👥 User Activity Pattern</h3>
+                <canvas id="userActivityChart"></canvas>
+            </div>
+            
+            <div class="chart-card">
+                <h3>📊 Message Distribution</h3>
+                <canvas id="messageDistChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="insights-section">
+            <h2 style="color: white; margin-bottom: 20px;">🧠 AI Insights</h2>
+            <div class="insight-item">
+                <span class="insight-label">🚀 Peak Performance Hour</span>
+                <span class="insight-value"><%= stats.hourlyStats.indexOf(Math.max(...stats.hourlyStats)) %>:00</span>
+            </div>
+            <div class="insight-item">
+                <span class="insight-label">⚡ Average Response Time</span>
+                <span class="insight-value"><%= Math.round(stats.averageResponseTime) %>ms</span>
+            </div>
+            <div class="insight-item">
+                <span class="insight-label">🎯 Success Rate</span>
+                <span class="insight-value">
+                    <%= Math.round(stats.responseTypes.success / (stats.responseTypes.success + stats.responseTypes.error + stats.responseTypes.timeout) * 100) || 0 %>%
+                </span>
+            </div>
+            <div class="insight-item">
+                <span class="insight-label">💬 Messages per User</span>
+                <span class="insight-value">
+                    <%= stats.totalUsers > 0 ? Math.round(stats.totalMessages / stats.totalUsers * 10) / 10 : 0 %>
+                </span>
+            </div>
+            <div class="insight-item">
+                <span class="insight-label">🔥 Busiest Hour Today</span>
+                <span class="insight-value">
+                    <%= stats.hourlyStats.indexOf(Math.max(...stats.hourlyStats)) %>:00 
+                    (<%= Math.max(...stats.hourlyStats) %> messages)
+                </span>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <a href="/" class="btn btn-primary">← Back to Dashboard</a>
+            <button onclick="location.reload()" class="btn btn-success">🔄 Refresh Data</button>
+        </div>
+    </div>
+    
+    <script>
+        // Response Time Chart
+        const responseCtx = document.getElementById('responseTimeChart').getContext('2d');
+        new Chart(responseCtx, {
+            type: 'line',
+            data: {
+                labels: ['Last 10', 'Last 9', 'Last 8', 'Last 7', 'Last 6', 'Last 5', 'Last 4', 'Last 3', 'Last 2', 'Latest'],
+                datasets: [{
+                    label: 'Response Time (ms)',
+                    data: [
+                        <% 
+                        const responseTimes = stats.recentMessages.slice(0, 10).reverse().map(m => m.responseTime || 0);
+                        while(responseTimes.length < 10) responseTimes.unshift(0);
+                        %>
+                        <%= responseTimes.join(',') %>
+                    ],
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: 'white' } } },
+                scales: {
+                    y: { ticks: { color: 'white' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
+                    x: { ticks: { color: 'white' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } }
+                }
+            }
+        });
+        
+        // Success Rate Chart
+        const successCtx = document.getElementById('successRateChart').getContext('2d');
+        new Chart(successCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Success', 'Error', 'Timeout'],
+                datasets: [{
+                    data: [
+                        <%= stats.responseTypes.success %>,
+                        <%= stats.responseTypes.error %>,
+                        <%= stats.responseTypes.timeout %>
+                    ],
+                    backgroundColor: ['#4CAF50', '#f44336', '#ff9800']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: 'white' } } }
+            }
+        });
+        
+        // User Activity Chart
+        const activityCtx = document.getElementById('userActivityChart').getContext('2d');
+        new Chart(activityCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Total Users', 'Active Today', 'Messages/Hour', 'Avg Response'],
+                datasets: [{
+                    label: 'Metrics',
+                    data: [
+                        <%= stats.totalUsers %>,
+                        <%= stats.activeUsers %>,
+                        <%= stats.messagesThisHour %>,
+                        <%= Math.round(stats.averageResponseTime / 100) %>
+                    ],
+                    backgroundColor: ['#2196F3', '#4CAF50', '#ff9800', '#9C27B0']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: 'white' } } },
+                scales: {
+                    y: { ticks: { color: 'white' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
+                    x: { ticks: { color: 'white' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } }
+                }
+            }
+        });
+        
+        // Message Distribution Chart
+        const distCtx = document.getElementById('messageDistChart').getContext('2d');
+        new Chart(distCtx, {
+            type: 'polarArea',
+            data: {
+                labels: ['Today', 'This Hour', 'Recent', 'Total'],
+                datasets: [{
+                    data: [
+                        <%= stats.messagesThisDay %>,
+                        <%= stats.messagesThisHour %>,
+                        <%= stats.recentMessages.length %>,
+                        <%= stats.totalMessages %>
+                    ],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 205, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: 'white' } } },
+                scales: {
+                    r: { 
+                        ticks: { color: 'white' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

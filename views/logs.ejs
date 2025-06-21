@@ -1,0 +1,281 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhook Logs</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .logs-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4CAF50;
+            transition: all 0.3s ease;
+        }
+        
+        .log-entry:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .log-entry.error {
+            border-left-color: #f44336;
+        }
+        
+        .log-entry.warning {
+            border-left-color: #ff9800;
+        }
+        
+        .log-entry.verification {
+            border-left-color: #2196F3;
+        }
+        
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .log-type {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .type-incoming {
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+        }
+        
+        .type-outgoing {
+            background: rgba(33, 150, 243, 0.8);
+            color: white;
+        }
+        
+        .type-verification {
+            background: rgba(156, 39, 176, 0.8);
+            color: white;
+        }
+        
+        .type-error {
+            background: rgba(244, 67, 54, 0.8);
+            color: white;
+        }
+        
+        .log-time {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+        
+        .log-data {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #fff;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .log-filters {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .log-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .control-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .control-btn.danger {
+            background: rgba(244, 67, 54, 0.8);
+        }
+        
+        .control-btn.danger:hover {
+            background: rgba(244, 67, 54, 1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Webhook Logs</h1>
+            <p>Monitor all incoming and outgoing webhook activity</p>
+        </div>
+        
+        <div class="nav-menu">
+            <div class="nav-links">
+                <a href="/" class="nav-link">📊 Dashboard</a>
+                <a href="/analytics" class="nav-link">📈 Analytics</a>
+                <a href="/users" class="nav-link">👥 Users</a>
+                <a href="/logs" class="nav-link active">📋 Logs</a>
+                <a href="/settings" class="nav-link">⚙️ Settings</a>
+                <a href="/test" class="nav-link">🧪 Test Bot</a>
+            </div>
+        </div>
+        
+        <div class="log-filters">
+            <div class="log-controls">
+                <button class="control-btn" onclick="location.reload()">🔄 Refresh</button>
+                <button class="control-btn danger" onclick="clearLogs()">🗑️ Clear Logs</button>
+                <button class="control-btn" onclick="toggleAutoRefresh()">⏯️ Auto Refresh</button>
+            </div>
+            
+            <div class="filter-row">
+                <button class="filter-btn active" onclick="filterLogs('all')">All</button>
+                <button class="filter-btn" onclick="filterLogs('incoming_webhook')">Incoming</button>
+                <button class="filter-btn" onclick="filterLogs('outgoing_message')">Outgoing</button>
+                <button class="filter-btn" onclick="filterLogs('verification')">Verification</button>
+                <button class="filter-btn" onclick="filterLogs('error')">Errors</button>
+            </div>
+        </div>
+        
+        <div class="logs-container">
+            <% if (logs.length === 0) { %>
+            <div style="text-align: center; color: rgba(255,255,255,0.6); padding: 40px;">
+                <h3>📝 No logs yet</h3>
+                <p>Webhook activity will appear here as your bot receives and sends messages.</p>
+            </div>
+            <% } else { %>
+            
+            <% logs.forEach(function(log) { %>
+            <div class="log-entry <%= log.type %> <%= !log.success ? 'error' : '' %>" data-type="<%= log.type %>">
+                <div class="log-header">
+                    <span class="log-type type-<%= log.type.replace('_', '-') %>">
+                        <%= log.type.replace('_', ' ').toUpperCase() %>
+                        <% if (log.success === false) { %> ❌<% } %>
+                    </span>
+                    <span class="log-time"><%= new Date(log.timestamp).toLocaleString() %></span>
+                </div>
+                
+                <% if (log.ip) { %>
+                <div style="color: rgba(255,255,255,0.7); margin-bottom: 10px;">
+                    IP: <%= log.ip %>
+                </div>
+                <% } %>
+                
+                <div class="log-data"><%= JSON.stringify(log.data, null, 2) %></div>
+            </div>
+            <% }); %>
+            
+            <% } %>
+        </div>
+        
+        <div class="buttons">
+            <a href="/" class="btn btn-primary">← Back to Dashboard</a>
+            <button onclick="exportLogs()" class="btn btn-success">📥 Export Logs</button>
+        </div>
+    </div>
+    
+    <script>
+        let autoRefresh = false;
+        let refreshInterval;
+        
+        function filterLogs(type) {
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const logEntries = document.querySelectorAll('.log-entry');
+            logEntries.forEach(entry => {
+                if (type === 'all' || entry.dataset.type === type) {
+                    entry.style.display = 'block';
+                } else {
+                    entry.style.display = 'none';
+                }
+            });
+        }
+        
+        async function clearLogs() {
+            if (!confirm('Are you sure you want to clear all logs?')) return;
+            
+            try {
+                const response = await fetch('/api/clear-logs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    location.reload();
+                }
+            } catch (error) {
+                alert('Failed to clear logs');
+            }
+        }
+        
+        function toggleAutoRefresh() {
+            autoRefresh = !autoRefresh;
+            
+            if (autoRefresh) {
+                refreshInterval = setInterval(() => location.reload(), 10000);
+                event.target.textContent = '⏸️ Stop Auto Refresh';
+                event.target.style.background = 'rgba(244, 67, 54, 0.8)';
+            } else {
+                clearInterval(refreshInterval);
+                event.target.textContent = '▶️ Auto Refresh';
+                event.target.style.background = 'rgba(255, 255, 255, 0.1)';
+            }
+        }
+        
+        function exportLogs() {
+            const logs = <%= JSON.stringify(logs) %>;
+            const dataStr = JSON.stringify(logs, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `bot-logs-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+        
+        // Scroll to top when page loads
+        window.addEventListener('load', () => {
+            document.querySelector('.logs-container').scrollTop = 0;
+        });
+    </script>
+</body>
+</html>
