@@ -267,7 +267,7 @@ app.post('/api/test-gemini', async (req, res) => {
     stats.averageResponseTime = (stats.averageResponseTime + responseTime) / 2;
     
     // Add credit message to test response
-    const responseWithCredit = aiResponse + '\n\n━━━━━━━━━━━━━━━━━━━━\n💝 Created with 🤍 by Sunnel John Rebano\n━━━━━━━━━━━━━━━━━━━━';
+    const responseWithCredit = aiResponse + '\n\n━━━━━━━━━━━━━━━━━━━━\nCreated with 🤍 by Sunnel John Rebano\n━━━━━━━━━━━━━━━━━━━━';
     
     res.json({ 
       success: true, 
