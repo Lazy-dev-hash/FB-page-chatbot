@@ -497,7 +497,10 @@
                         <br>• And much more!
                         <br><br>
                         <em>Try the quick actions on the left or just start typing! 😊</em>
-                        <div class="credit-message">💝 Created with 🤍 by Sunnel John Rebano</div>
+                        <div class="credit-message">
+                            💝 Created with 🤍 by <strong>Sunnel John Rebano</strong><br>
+                            🕒 Welcome at <%= new Date().toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' }) %>
+                        </div>
                     </div>
                     <div class="message-time">Just now</div>
                 </div>
@@ -580,7 +583,7 @@
                 if (parts.length > 1) {
                     const creditDiv = document.createElement('div');
                     creditDiv.className = 'credit-message';
-                    creditDiv.innerHTML = '💝 Created with 🤍 by <strong>Sunnel John Rebano</strong>';
+                    creditDiv.innerHTML = '💝 Created with 🤍 by <strong>Sunnel John Rebano</strong><br>🕒 Asked at ' + parts[1].match(/🕒 Asked at ([^\\n]+)/)?.[1] || 'N/A';
                     messageBubble.appendChild(creditDiv);
                 }
             }

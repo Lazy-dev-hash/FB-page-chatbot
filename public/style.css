@@ -1059,7 +1059,12 @@ body {
     background: linear-gradient(135deg, #7f1d1d, #991b1b);
   }
 
+  .notification-success {
+    background: linear-gradient(135deg, #15803d, #16a34a);
+  }
+
   .notification-info {
     background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
+  });
   }
 }

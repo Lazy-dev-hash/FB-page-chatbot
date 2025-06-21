@@ -1,4 +1,7 @@
+Adding timestamp to the test response by modifying the credit message.
+```
 
+```replit_final_file
 const express = require('express');
 const bodyParser = require('body-parser');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
@@ -21,10 +24,10 @@ async function initializeGemini() {
       console.warn('⚠️ GEMINI_API_KEY not found in environment variables');
       return false;
     }
-    
+
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-    
+
     // Test the connection
     const testResult = await model.generateContent("Hello");
     if (testResult.response.text()) {
@@ -80,7 +83,7 @@ let botConfig = {
   customGreeting: "Hello! I'm your AI assistant powered by Gemini. How can I help you today?",
   enableAnalytics: true,
   debugMode: false,
-  
+
   // New advanced features
   enableContextAwareness: true,
   enableSentimentAnalysis: true,
@@ -124,7 +127,7 @@ app.get('/', (req, res) => {
     facebookConfigured: !!(process.env.FACEBOOK_PAGE_ACCESS_TOKEN && process.env.FACEBOOK_VERIFY_TOKEN),
     webhookUrl: `${req.protocol}://${req.get('host')}/webhook`
   };
-  
+
   const enhancedStats = {
     ...stats,
     totalUsers: stats.totalUsers.size,
@@ -133,7 +136,7 @@ app.get('/', (req, res) => {
     memoryUsage: process.memoryUsage(),
     currentHour: new Date().getHours()
   };
-  
+
   res.render('dashboard', { stats: enhancedStats, config, botConfig });
 });
 
@@ -220,7 +223,7 @@ app.get('/api/export-stats', (req, res) => {
     },
     config: botConfig
   };
-  
+
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Content-Disposition', 'attachment; filename="bot-stats.json"');
   res.send(JSON.stringify(exportData, null, 2));
@@ -229,7 +232,7 @@ app.get('/api/export-stats', (req, res) => {
 // Enhanced test Gemini endpoint with advanced AI features
 app.post('/api/test-gemini', async (req, res) => {
   const startTime = Date.now();
-  
+
   try {
     if (!model) {
       return res.json({ 
@@ -239,14 +242,14 @@ app.post('/api/test-gemini', async (req, res) => {
     }
 
     const { message } = req.body;
-    
+
     if (!message || message.length > botConfig.maxMessageLength) {
       return res.json({
         success: false,
         error: `Message must be between 1 and ${botConfig.maxMessageLength} characters`
       });
     }
-    
+
     // Create a mock user profile for testing
     const testUserProfile = {
       messageCount: 1,
@@ -254,21 +257,26 @@ app.post('/api/test-gemini', async (req, res) => {
       preferences: {},
       sentiment: 'neutral'
     };
-    
+
     // Use enhanced response generation
     const aiResponse = await generateEnhancedResponse(message, testUserProfile, 'test-user');
     const responseTime = Date.now() - startTime;
-    
+
     // Analyze the test interaction
     const sentiment = analyzeSentiment(message);
     const intent = detectIntent(message);
-    
+
     stats.responseTypes.success++;
     stats.averageResponseTime = (stats.averageResponseTime + responseTime) / 2;
-    
-    // Add credit message to test response
-    const responseWithCredit = aiResponse + '\n\n━━━━━━━━━━━━━━━━━━━━\nCreated with 🤍 by Sunnel John Rebano\n━━━━━━━━━━━━━━━━━━━━';
-    
+
+    // Add credit message with timestamp to test response
+    const currentTime = new Date().toLocaleTimeString('en-US', { 
+      hour12: true, 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+    const responseWithCredit = aiResponse + '\n\n━━━━━━━━━━━━━━━━━━━━\n💝 Created with 🤍 by Sunnel John Rebano\n🕒 Asked at ' + currentTime + '\n━━━━━━━━━━━━━━━━━━━━';
+
     res.json({ 
       success: true, 
       response: responseWithCredit,
@@ -288,13 +296,13 @@ app.post('/api/test-gemini', async (req, res) => {
     });
   } catch (error) {
     const responseTime = Date.now() - startTime;
-    
+
     if (error.message === 'Response timeout') {
       stats.responseTypes.timeout++;
     } else {
       stats.responseTypes.error++;
     }
-    
+
     res.json({ 
       success: false, 
       error: error.message,
@@ -306,25 +314,25 @@ app.post('/api/test-gemini', async (req, res) => {
 // Facebook webhook verification
 app.get('/webhook', (req, res) => {
   const VERIFY_TOKEN = process.env.FACEBOOK_VERIFY_TOKEN;
-  
+
   if (!VERIFY_TOKEN) {
     return res.status(500).send('FACEBOOK_VERIFY_TOKEN not configured');
   }
-  
+
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
-  
+
   const logEntry = {
     timestamp: new Date(),
     type: 'verification',
     data: { mode, token: token ? '***' : null },
     ip: req.ip
   };
-  
+
   stats.webhookLogs.unshift(logEntry);
   if (stats.webhookLogs.length > 1000) stats.webhookLogs.pop();
-  
+
   if (mode && token) {
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
       console.log('WEBHOOK_VERIFIED');
@@ -338,28 +346,28 @@ app.get('/webhook', (req, res) => {
 // Enhanced Facebook webhook handler
 app.post('/webhook', async (req, res) => {
   const body = req.body;
-  
+
   const logEntry = {
     timestamp: new Date(),
     type: 'incoming_webhook',
     data: body,
     ip: req.ip
   };
-  
+
   stats.webhookLogs.unshift(logEntry);
   if (stats.webhookLogs.length > 1000) stats.webhookLogs.pop();
-  
+
   if (body.object === 'page') {
     body.entry.forEach(async (entry) => {
       const webhookEvent = entry.messaging[0];
-      
+
       if (webhookEvent.message) {
         await handleMessage(webhookEvent.sender.id, webhookEvent.message.text);
       } else if (webhookEvent.postback) {
         await handlePostback(webhookEvent.sender.id, webhookEvent.postback.payload);
       }
     });
-    
+
     res.status(200).send('EVENT_RECEIVED');
   } else {
     res.sendStatus(404);
@@ -369,10 +377,10 @@ app.post('/webhook', async (req, res) => {
 // Enhanced message handler with advanced AI features
 async function handleMessage(senderId, messageText) {
   const startTime = Date.now();
-  
+
   try {
     console.log(`Received message from ${senderId}: ${messageText}`);
-    
+
     // Update user profile with enhanced tracking
     if (!stats.userProfiles[senderId]) {
       stats.userProfiles[senderId] = {
@@ -386,12 +394,12 @@ async function handleMessage(senderId, messageText) {
         topics: []
       };
     }
-    
+
     const userProfile = stats.userProfiles[senderId];
     userProfile.messageCount++;
     userProfile.lastMessage = messageText;
     userProfile.lastSeen = new Date();
-    
+
     // Add to conversation history (keep last 10 messages)
     userProfile.conversationHistory.unshift({
       message: messageText,
@@ -401,17 +409,17 @@ async function handleMessage(senderId, messageText) {
     if (userProfile.conversationHistory.length > 10) {
       userProfile.conversationHistory = userProfile.conversationHistory.slice(0, 10);
     }
-    
+
     // Update statistics
     stats.totalMessages++;
     stats.messagesThisHour++;
     stats.messagesThisDay++;
     stats.totalUsers.add(senderId);
     stats.activeUsers.add(senderId);
-    
+
     const currentHour = new Date().getHours();
     stats.hourlyStats[currentHour]++;
-    
+
     stats.recentMessages.unshift({
       senderId,
       message: messageText,
@@ -420,58 +428,63 @@ async function handleMessage(senderId, messageText) {
       responseTime: null,
       sentiment: analyzeSentiment(messageText)
     });
-    
+
     if (stats.recentMessages.length > 50) {
       stats.recentMessages = stats.recentMessages.slice(0, 50);
     }
-    
+
     if (!botConfig.autoRespond) {
       return;
     }
-    
+
     if (!model) {
       const errorMsg = 'Bot configuration error. Please contact administrator.';
       await sendFacebookMessage(senderId, errorMsg);
       return;
     }
-    
+
     // Send typing indicator if enabled
     if (botConfig.enableTypingIndicator) {
       await sendTypingIndicator(senderId);
     }
-    
+
     // Enhanced AI prompt with context awareness
     const aiResponse = await generateEnhancedResponse(messageText, userProfile, senderId);
     const responseTime = Date.now() - startTime;
-    
+
     console.log('Enhanced AI Response:', aiResponse);
-    
+
     // Update recent messages with response
     if (stats.recentMessages[0]) {
       stats.recentMessages[0].response = aiResponse;
       stats.recentMessages[0].responseTime = responseTime;
     }
-    
+
     stats.responseTypes.success++;
     stats.averageResponseTime = (stats.averageResponseTime + responseTime) / 2;
-    
-    // Add credit message to response
-    const responseWithCredit = aiResponse + '\n\n━━━━━━━━━━━━━━━━━━━━\n💝 Created with 🤍 by Sunnel John Rebano\n━━━━━━━━━━━━━━━━━━━━';
-    
+
+    // Add credit message with timestamp to response
+    const currentTime = new Date().toLocaleTimeString('en-US', { 
+      hour12: true, 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+    const responseWithCredit = aiResponse + '\n\n━━━━━━━━━━━━━━━━━━━━\n💝 Created with 🤍 by Sunnel John Rebano\n🕒 Asked at ' + currentTime + '\n━━━━━━━━━━━━━━━━━━━━';
+
     // Send response back to Facebook
     await sendFacebookMessage(senderId, responseWithCredit);
-    
+
   } catch (error) {
     console.error('Error handling message:', error);
-    
+
     const responseTime = Date.now() - startTime;
-    
+
     if (error.message === 'Response timeout') {
       stats.responseTypes.timeout++;
     } else {
       stats.responseTypes.error++;
     }
-    
+
     await sendFacebookMessage(senderId, 'Sorry, I encountered an error processing your message. Please try again.');
   }
 }
@@ -480,15 +493,15 @@ async function handleMessage(senderId, messageText) {
 function analyzeSentiment(text) {
   const positiveWords = ['happy', 'great', 'awesome', 'amazing', 'love', 'good', 'excellent', 'wonderful', 'fantastic', 'perfect', 'thank you', 'thanks'];
   const negativeWords = ['sad', 'bad', 'terrible', 'awful', 'hate', 'horrible', 'angry', 'frustrated', 'problem', 'issue', 'error', 'broken'];
-  
+
   const words = text.toLowerCase().split(/\s+/);
   let score = 0;
-  
+
   words.forEach(word => {
     if (positiveWords.includes(word)) score += 1;
     if (negativeWords.includes(word)) score -= 1;
   });
-  
+
   if (score > 0) return 'positive';
   if (score < 0) return 'negative';
   return 'neutral';
@@ -499,16 +512,16 @@ async function generateEnhancedResponse(messageText, userProfile, senderId) {
   try {
     // Detect message intent
     const intent = detectIntent(messageText);
-    
+
     // Build context from conversation history
     const conversationContext = userProfile.conversationHistory
       .slice(0, 3)
       .map(msg => `User: ${msg.message}`)
       .join('\n');
-    
+
     // Enhanced prompt based on intent and context
     let enhancedPrompt = '';
-    
+
     switch (intent) {
       case 'greeting':
         enhancedPrompt = `You are a friendly Facebook bot assistant. The user is greeting you. 
@@ -516,37 +529,37 @@ async function generateEnhancedResponse(messageText, userProfile, senderId) {
         User's message: "${messageText}"
         Respond warmly and naturally. Ask how you can help them today.`;
         break;
-        
+
       case 'question':
         enhancedPrompt = `You are a knowledgeable Facebook bot assistant. The user has a question.
         ${conversationContext ? `Recent conversation:\n${conversationContext}\n` : ''}
         Current question: "${messageText}"
         Provide a helpful, accurate, and detailed answer. If you're unsure, say so and suggest alternatives.`;
         break;
-        
+
       case 'help':
         enhancedPrompt = `You are a helpful Facebook bot assistant. The user needs help.
         User's request: "${messageText}"
         Provide clear, step-by-step guidance. Be encouraging and supportive. Offer specific solutions.`;
         break;
-        
+
       case 'complaint':
         enhancedPrompt = `You are an empathetic Facebook bot assistant. The user seems frustrated or has a complaint.
         User's message: "${messageText}"
         Respond with empathy and understanding. Acknowledge their concern and offer to help resolve it.`;
         break;
-        
+
       case 'thanks':
         enhancedPrompt = `You are a gracious Facebook bot assistant. The user is thanking you.
         User's message: "${messageText}"
         Respond humbly and offer continued assistance. Keep it brief but warm.`;
         break;
-        
+
       default:
         enhancedPrompt = `You are an intelligent Facebook bot assistant powered by Gemini AI.
         ${conversationContext ? `Recent conversation:\n${conversationContext}\n` : ''}
         User's current message: "${messageText}"
-        
+
         Instructions:
         - Be conversational and engaging
         - Show personality while being helpful
@@ -562,21 +575,21 @@ async function generateEnhancedResponse(messageText, userProfile, senderId) {
         - When providing complex information, organize it with clear headings
         - Be creative and informative`;
     }
-    
+
     const result = await Promise.race([
       model.generateContent(enhancedPrompt),
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Response timeout')), botConfig.responseTimeout)
       )
     ]);
-    
+
     let response = result.response.text();
-    
+
     // Post-process response for better formatting
     response = enhanceResponseFormatting(response, intent);
-    
+
     return response;
-    
+
   } catch (error) {
     console.error('Enhanced response generation failed:', error);
     // Fallback to basic response
@@ -589,27 +602,27 @@ async function generateEnhancedResponse(messageText, userProfile, senderId) {
 // Intent detection for better response targeting
 function detectIntent(messageText) {
   const text = messageText.toLowerCase();
-  
+
   if (/^(hi|hello|hey|good morning|good afternoon|good evening)/.test(text)) {
     return 'greeting';
   }
-  
+
   if (/\?|how|what|when|where|why|who|can you|could you|would you/.test(text)) {
     return 'question';
   }
-  
+
   if (/help|assist|support|guide|how to|tutorial/.test(text)) {
     return 'help';
   }
-  
+
   if (/(thank|thanks|thx|appreciate|grateful)/.test(text)) {
     return 'thanks';
   }
-  
+
   if (/(problem|issue|bug|error|wrong|broken|not working|frustrated|angry)/.test(text)) {
     return 'complaint';
   }
-  
+
   return 'general';
 }
 
@@ -617,27 +630,27 @@ function detectIntent(messageText) {
 function enhanceResponseFormatting(response, intent) {
   // Remove excessive line breaks
   response = response.replace(/\n{3,}/g, '\n\n');
-  
+
   // Intelligent content detection and formatting
   response = applyIntelligentFormatting(response);
-  
+
   // Ensure responses aren't too long for Facebook
   if (response.length > 2000) {
     response = response.substring(0, 1950) + '... (truncated for readability)';
   }
-  
+
   // Add appropriate closing based on intent
   if (intent === 'help' && !response.includes('?')) {
     response += '\n\nLet me know if you need any clarification! 😊';
   }
-  
+
   return response.trim();
 }
 
 // Intelligent content formatting with auto-detection
 function applyIntelligentFormatting(text) {
   let formattedText = text;
-  
+
   // 1. Auto-detect and format ANSWERS
   formattedText = formattedText.replace(
     /(?:^|\n)((?:answer|solution|result):\s*)(.*?)(?=\n\n|\n(?:[a-z]*explanation|note|example)|$)/gmi,
@@ -645,7 +658,7 @@ function applyIntelligentFormatting(text) {
       return `\n━━━━━━━━━━━━━━━━━━━━\n**📋 ANSWER**\n━━━━━━━━━━━━━━━━━━━━\n${content.trim()}\n━━━━━━━━━━━━━━━━━━━━\n`;
     }
   );
-  
+
   // 2. Auto-detect and format EXPLANATIONS
   formattedText = formattedText.replace(
     /(?:^|\n)((?:explanation|why|because|how it works):\s*)(.*?)(?=\n\n|\n(?:[a-z]*answer|note|example)|$)/gmi,
@@ -653,7 +666,7 @@ function applyIntelligentFormatting(text) {
       return `\n━━━━━━━━━━━━━━━━━━━━\n**💡 EXPLANATION**\n━━━━━━━━━━━━━━━━━━━━\n${content.trim()}\n━━━━━━━━━━━━━━━━━━━━\n`;
     }
   );
-  
+
   // 3. Auto-detect and format EXAMPLES
   formattedText = formattedText.replace(
     /(?:^|\n)((?:example|for instance|e\.?g\.?):\s*)(.*?)(?=\n\n|\n(?:[a-z]*answer|explanation|note)|$)/gmi,
@@ -661,7 +674,7 @@ function applyIntelligentFormatting(text) {
       return `\n━━━━━━━━━━━━━━━━━━━━\n**🔍 EXAMPLE**\n━━━━━━━━━━━━━━━━━━━━\n${content.trim()}\n━━━━━━━━━━━━━━━━━━━━\n`;
     }
   );
-  
+
   // 4. Auto-detect and format NOTES/IMPORTANT INFO
   formattedText = formattedText.replace(
     /(?:^|\n)((?:note|important|remember|warning):\s*)(.*?)(?=\n\n|\n(?:[a-z]*answer|explanation|example)|$)/gmi,
@@ -669,7 +682,7 @@ function applyIntelligentFormatting(text) {
       return `\n━━━━━━━━━━━━━━━━━━━━\n**⚠️ IMPORTANT**\n━━━━━━━━━━━━━━━━━━━━\n${content.trim()}\n━━━━━━━━━━━━━━━━━━━━\n`;
     }
   );
-  
+
   // 5. Auto-detect and format STEPS/PROCEDURES
   formattedText = formattedText.replace(
     /(?:^|\n)((?:steps|procedure|how to):\s*)(.*?)(?=\n\n|\n(?:[a-z]*answer|explanation|example)|$)/gmi,
@@ -677,82 +690,82 @@ function applyIntelligentFormatting(text) {
       return `\n━━━━━━━━━━━━━━━━━━━━\n**📝 STEPS**\n━━━━━━━━━━━━━━━━━━━━\n${content.trim()}\n━━━━━━━━━━━━━━━━━━━━\n`;
     }
   );
-  
+
   // 6. Auto-detect numbered lists and enhance them
   formattedText = formattedText.replace(
     /(\d+\.\s+)([^\n]+)/g,
     '**$1** $2'
   );
-  
+
   // 7. Auto-detect bullet points and enhance them
   formattedText = formattedText.replace(
     /^[\s]*[-•*]\s+(.+)$/gm,
     '🔸 **$1**'
   );
-  
+
   // 8. Auto-detect code blocks (inline and block)
   formattedText = formattedText.replace(
     /`([^`\n]+)`/g,
     '**💻 `$1`**'
   );
-  
+
   // 9. Auto-detect code blocks (multi-line)
   formattedText = formattedText.replace(
     /```([\s\S]*?)```/g,
     '\n━━━━━━━━━━━━━━━━━━━━\n**💻 CODE**\n━━━━━━━━━━━━━━━━━━━━\n```$1```\n━━━━━━━━━━━━━━━━━━━━\n'
   );
-  
+
   // 10. Auto-detect questions and enhance them
   formattedText = formattedText.replace(
     /^([^?]*\?)\s*$/gm,
     '**❓ $1**'
   );
-  
+
   // 11. Auto-detect key terms (words in quotes)
   formattedText = formattedText.replace(
     /"([^"]+)"/g,
     '**"$1"**'
   );
-  
+
   // 12. Auto-detect definition patterns
   formattedText = formattedText.replace(
     /(\b\w+\b)\s+(?:is|means|refers to|defined as)\s+([^.!?]+[.!?])/gi,
     '**📖 $1:** $2'
   );
-  
+
   // 13. Auto-detect pros/cons
   formattedText = formattedText.replace(
     /(?:^|\n)((?:pros?|advantages?):\s*)(.*?)(?=\n\n|\n(?:cons?|disadvantages?)|$)/gmi,
     '\n━━━━━━━━━━━━━━━━━━━━\n**✅ PROS**\n━━━━━━━━━━━━━━━━━━━━\n$2\n━━━━━━━━━━━━━━━━━━━━\n'
   );
-  
+
   formattedText = formattedText.replace(
     /(?:^|\n)((?:cons?|disadvantages?):\s*)(.*?)(?=\n\n|\n(?:pros?|advantages?)|$)/gmi,
     '\n━━━━━━━━━━━━━━━━━━━━\n**❌ CONS**\n━━━━━━━━━━━━━━━━━━━━\n$2\n━━━━━━━━━━━━━━━━━━━━\n'
   );
-  
+
   // 14. Auto-detect tips and tricks
   formattedText = formattedText.replace(
     /(?:^|\n)((?:tip|trick|hint):\s*)(.*?)(?=\n\n|\n(?:[a-z]*)|$)/gmi,
     '\n━━━━━━━━━━━━━━━━━━━━\n**💡 TIP**\n━━━━━━━━━━━━━━━━━━━━\n$2\n━━━━━━━━━━━━━━━━━━━━\n'
   );
-  
+
   // 15. Auto-detect summary/conclusion
   formattedText = formattedText.replace(
     /(?:^|\n)((?:summary|conclusion|in summary|to summarize):\s*)(.*?)(?=\n\n|$)/gmi,
     '\n━━━━━━━━━━━━━━━━━━━━\n**📄 SUMMARY**\n━━━━━━━━━━━━━━━━━━━━\n$2\n━━━━━━━━━━━━━━━━━━━━\n'
   );
-  
+
   // 16. Auto-detect URLs and format them
   formattedText = formattedText.replace(
     /(https?:\/\/[^\s]+)/g,
     '**🔗 $1**'
   );
-  
+
   // 17. Clean up excessive formatting
   formattedText = formattedText.replace(/━{3,}/g, '━━━━━━━━━━━━━━━━━━━━');
   formattedText = formattedText.replace(/\n{4,}/g, '\n\n\n');
-  
+
   return formattedText;
 }
 
@@ -763,304 +776,4 @@ function detectContentType(text) {
     explanation: /(?:explanation|why|because|how it works):/i,
     example: /(?:example|for instance|e\.?g\.?):/i,
     steps: /(?:steps|procedure|how to):/i,
-    code: /```|`[^`]+`/,
-    question: /\?$/m,
-    list: /^[\s]*(?:\d+\.|[-•*])\s+/m,
-    definition: /\b\w+\b\s+(?:is|means|refers to|defined as)\s+/i,
-    pros: /(?:pros?|advantages?):/i,
-    cons: /(?:cons?|disadvantages?):/i,
-    tip: /(?:tip|trick|hint):/i,
-    note: /(?:note|important|remember|warning):/i,
-    summary: /(?:summary|conclusion|in summary|to summarize):/i
-  };
-  
-  const detected = [];
-  
-  for (const [type, pattern] of Object.entries(patterns)) {
-    if (pattern.test(text)) {
-      detected.push(type);
-    }
-  }
-  
-  return detected;
-}
-
-// Handle postback (for interactive elements)
-async function handlePostback(senderId, payload) {
-  console.log(`Received postback from ${senderId}: ${payload}`);
-  
-  switch (payload) {
-    case 'GET_STARTED':
-      await sendFacebookMessage(senderId, botConfig.customGreeting);
-      break;
-    case 'HELP':
-      await sendFacebookMessage(senderId, "I'm here to help! Just send me any message and I'll do my best to assist you.");
-      break;
-    default:
-      await sendFacebookMessage(senderId, "Thanks for interacting with me!");
-  }
-}
-
-// Send typing indicator
-async function sendTypingIndicator(recipientId) {
-  const PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
-  
-  if (!PAGE_ACCESS_TOKEN) return;
-  
-  try {
-    const axios = require('axios');
-    await axios.post(
-      `https://graph.facebook.com/v18.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
-      {
-        recipient: { id: recipientId },
-        sender_action: "typing_on"
-      }
-    );
-  } catch (error) {
-    console.error('Error sending typing indicator:', error.message);
-  }
-}
-
-// Enhanced Facebook message sender
-async function sendFacebookMessage(recipientId, messageText) {
-  const PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
-  
-  if (!PAGE_ACCESS_TOKEN) {
-    console.error('Facebook Page Access Token not found');
-    return;
-  }
-  
-  const requestBody = {
-    recipient: { id: recipientId },
-    message: { text: messageText }
-  };
-  
-  try {
-    const axios = require('axios');
-    const response = await axios.post(
-      `https://graph.facebook.com/v18.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
-      requestBody
-    );
-    
-    console.log('Message sent successfully:', response.data);
-    
-    // Log successful send
-    stats.webhookLogs.unshift({
-      timestamp: new Date(),
-      type: 'outgoing_message',
-      data: { recipientId, message: messageText.substring(0, 100) + '...' },
-      success: true
-    });
-    
-  } catch (error) {
-    console.error('Error sending Facebook message:', error.response?.data || error.message);
-    
-    // Log failed send
-    stats.webhookLogs.unshift({
-      timestamp: new Date(),
-      type: 'outgoing_message',
-      data: { recipientId, error: error.message },
-      success: false
-    });
-  }
-}
-
-// API endpoint to get recent messages
-app.get('/api/messages', (req, res) => {
-  res.json(stats.recentMessages);
-});
-
-// Broadcast message to all users
-app.post('/api/broadcast', async (req, res) => {
-  try {
-    const { message } = req.body;
-    const userIds = Object.keys(stats.userProfiles);
-    
-    let successCount = 0;
-    let errorCount = 0;
-    
-    for (const userId of userIds) {
-      try {
-        await sendFacebookMessage(userId, message);
-        successCount++;
-      } catch (error) {
-        errorCount++;
-      }
-    }
-    
-    res.json({ 
-      success: true, 
-      sent: successCount, 
-      errors: errorCount,
-      totalUsers: userIds.length 
-    });
-  } catch (error) {
-    res.json({ success: false, error: error.message });
-  }
-});
-
-// YouTube to MP3 converter
-app.post('/api/youtube-mp3', async (req, res) => {
-  try {
-    const { url } = req.body;
-    
-    if (!url || !ytdl.validateURL(url)) {
-      return res.json({ success: false, error: 'Invalid YouTube URL' });
-    }
-    
-    const info = await ytdl.getInfo(url);
-    const title = info.videoDetails.title.replace(/[^\w\s]/gi, '');
-    
-    res.setHeader('Content-Disposition', `attachment; filename="${title}.mp3"`);
-    res.setHeader('Content-Type', 'audio/mpeg');
-    
-    const audioStream = ytdl(url, {
-      filter: 'audioonly',
-      quality: 'highestaudio'
-    });
-    
-    ffmpeg(audioStream)
-      .audioBitrate(128)
-      .format('mp3')
-      .on('error', (err) => {
-        console.error('FFmpeg error:', err);
-        if (!res.headersSent) {
-          res.json({ success: false, error: 'Conversion failed' });
-        }
-      })
-      .pipe(res);
-      
-  } catch (error) {
-    console.error('YouTube MP3 error:', error);
-    res.json({ success: false, error: error.message });
-  }
-});
-
-// YouTube video downloader
-app.post('/api/youtube-video', async (req, res) => {
-  try {
-    const { url, quality = 'highest' } = req.body;
-    
-    if (!url || !ytdl.validateURL(url)) {
-      return res.json({ success: false, error: 'Invalid YouTube URL' });
-    }
-    
-    const info = await ytdl.getInfo(url);
-    const title = info.videoDetails.title.replace(/[^\w\s]/gi, '');
-    
-    res.setHeader('Content-Disposition', `attachment; filename="${title}.mp4"`);
-    res.setHeader('Content-Type', 'video/mp4');
-    
-    const videoStream = ytdl(url, {
-      quality: quality,
-      filter: 'videoandaudio'
-    });
-    
-    videoStream.pipe(res);
-    
-  } catch (error) {
-    console.error('YouTube video error:', error);
-    res.json({ success: false, error: error.message });
-  }
-});
-
-// YouTube info endpoint
-app.post('/api/youtube-info', async (req, res) => {
-  try {
-    const { url } = req.body;
-    
-    if (!url || !ytdl.validateURL(url)) {
-      return res.json({ success: false, error: 'Invalid YouTube URL' });
-    }
-    
-    const info = await ytdl.getInfo(url);
-    const videoDetails = {
-      title: info.videoDetails.title,
-      duration: info.videoDetails.lengthSeconds,
-      thumbnail: info.videoDetails.thumbnails[0]?.url,
-      description: info.videoDetails.description?.substring(0, 200) + '...',
-      author: info.videoDetails.author.name,
-      viewCount: info.videoDetails.viewCount
-    };
-    
-    res.json({ success: true, video: videoDetails });
-    
-  } catch (error) {
-    console.error('YouTube info error:', error);
-    res.json({ success: false, error: error.message });
-  }
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  const health = {
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-    gemini: geminiHealthy,
-    facebook: !!(process.env.FACEBOOK_PAGE_ACCESS_TOKEN && process.env.FACEBOOK_VERIFY_TOKEN),
-    environment: process.env.NODE_ENV || 'development'
-  };
-  
-  res.json(health);
-});
-
-// Auto-uptime system for 24/7 operation
-const keepAlive = () => {
-  const axios = require('axios');
-  const url = process.env.REPL_URL || `http://localhost:${PORT}`;
-  
-  setInterval(async () => {
-    try {
-      await axios.get(`${url}/health`);
-      console.log('🔄 Auto-uptime ping successful');
-    } catch (error) {
-      console.log('⚠️ Auto-uptime ping failed:', error.message);
-    }
-  }, 240000); // Ping every 4 minutes to keep alive
-};
-
-// Start auto-uptime system
-keepAlive();
-
-// System monitoring
-setInterval(async () => {
-  const memUsage = process.memoryUsage();
-  if (memUsage.heapUsed > 100 * 1024 * 1024) { // 100MB
-    console.warn('⚠️ High memory usage detected:', Math.round(memUsage.heapUsed / 1024 / 1024) + 'MB');
-  }
-  
-  // Reconnect Gemini if needed
-  if (!geminiHealthy) {
-    console.log('🔄 Attempting to reconnect to Gemini AI...');
-    await initializeGemini();
-  }
-}, 60000); // Check every minute
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('📴 Received SIGTERM, shutting down gracefully...');
-  process.exit(0);
-});
-
-process.on('SIGINT', () => {
-  console.log('📴 Received SIGINT, shutting down gracefully...');
-  process.exit(0);
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log('🚀 ================================');
-  console.log(`🤖 Facebook Bot Server Started`);
-  console.log(`📡 Port: ${PORT}`);
-  console.log(`🌐 Dashboard: http://0.0.0.0:${PORT}`);
-  console.log(`🧪 Test Interface: http://0.0.0.0:${PORT}/test`);
-  console.log(`📈 Analytics: http://0.0.0.0:${PORT}/analytics`);
-  console.log(`👥 Users: http://0.0.0.0:${PORT}/users`);
-  console.log(`📋 Logs: http://0.0.0.0:${PORT}/logs`);
-  console.log(`⚙️ Settings: http://0.0.0.0:${PORT}/settings`);
-  console.log(`💚 Health: http://0.0.0.0:${PORT}/health`);
-  console.log('🚀 ================================');
-  console.log(`💝 Created with 🤍 by Sunnel John Rebano`);
-  console.log('🚀 ================================');
-});
+    code: /
