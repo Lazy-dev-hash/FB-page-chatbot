@@ -191,9 +191,31 @@
                 <button class="quick-test-btn" onclick="sendQuickTest('Hello! How are you?')">👋 Greeting</button>
                 <button class="quick-test-btn" onclick="sendQuickTest('What can you help me with?')">❓ Help</button>
                 <button class="quick-test-btn" onclick="sendQuickTest('Tell me a joke')">😄 Joke</button>
-                <button class="quick-test-btn" onclick="sendQuickTest('What is the weather like?')">🌤️ Weather</button>
+                <button class="quick-test-btn" onclick="sendQuickTest('I am feeling sad today')">😢 Negative Sentiment</button>
+                <button class="quick-test-btn" onclick="sendQuickTest('This is amazing! I love it!')">🎉 Positive Sentiment</button>
                 <button class="quick-test-btn" onclick="sendQuickTest('Can you explain AI?')">🤖 AI Info</button>
-                <button class="quick-test-btn" onclick="sendQuickTest('Thank you!')">🙏 Thanks</button>
+                <button class="quick-test-btn" onclick="sendQuickTest('I have a problem with my account')">🚨 Support Issue</button>
+                <button class="quick-test-btn" onclick="sendQuickTest('Thank you so much!')">🙏 Thanks</button>
+            </div>
+        </div>
+        
+        <div class="test-config">
+            <h3 style="color: white; margin-bottom: 15px;">🔬 AI Analysis Features</h3>
+            <div id="aiAnalysis" style="display: none; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                    <div style="text-align: center;">
+                        <div style="color: #4CAF50; font-weight: bold;" id="detectedSentiment">-</div>
+                        <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Sentiment</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="color: #2196F3; font-weight: bold;" id="detectedIntent">-</div>
+                        <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Intent</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="color: #ff9800; font-weight: bold;" id="responseLength">-</div>
+                        <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Response Length</div>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -321,6 +343,11 @@
                     addMessage(data.response, false, responseTime);
                     testStats.successCount++;
                     testStats.totalResponseTime += responseTime;
+                    
+                    // Show AI analysis if available
+                    if (data.analysis) {
+                        showAIAnalysis(data.analysis);
+                    }
                 } else {
                     addMessage(`❌ Error: ${data.error}`, false, responseTime);
                     showError(data.error);
@@ -370,6 +397,32 @@
                 this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
             }
         });
+        
+        function showAIAnalysis(analysis) {
+            const analysisDiv = document.getElementById('aiAnalysis');
+            const sentimentSpan = document.getElementById('detectedSentiment');
+            const intentSpan = document.getElementById('detectedIntent');
+            const lengthSpan = document.getElementById('responseLength');
+            
+            // Update sentiment with color coding
+            sentimentSpan.textContent = analysis.sentiment.toUpperCase();
+            sentimentSpan.style.color = analysis.sentiment === 'positive' ? '#4CAF50' : 
+                                       analysis.sentiment === 'negative' ? '#f44336' : '#ff9800';
+            
+            // Update intent
+            intentSpan.textContent = analysis.intent.toUpperCase();
+            
+            // Update response length
+            lengthSpan.textContent = `${analysis.responseLength} chars`;
+            
+            // Show the analysis
+            analysisDiv.style.display = 'block';
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                analysisDiv.style.display = 'none';
+            }, 10000);
+        }
         
         // Focus input on load
         messageInput.focus();

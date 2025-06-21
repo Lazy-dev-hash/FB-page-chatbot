@@ -232,6 +232,85 @@
             </div>
             
             <div class="settings-section">
+                <h3>🧠 Advanced AI Features</h3>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Context Awareness</div>
+                        <div class="setting-description">Remember conversation history for better responses</div>
+                    </div>
+                    <div class="setting-control">
+                        <div class="toggle-switch <%= config.enableContextAwareness ? 'active' : '' %>" onclick="toggleSetting('enableContextAwareness')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Sentiment Analysis</div>
+                        <div class="setting-description">Analyze user emotions for empathetic responses</div>
+                    </div>
+                    <div class="setting-control">
+                        <div class="toggle-switch <%= config.enableSentimentAnalysis ? 'active' : '' %>" onclick="toggleSetting('enableSentimentAnalysis')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Intent Detection</div>
+                        <div class="setting-description">Detect user intentions for targeted responses</div>
+                    </div>
+                    <div class="setting-control">
+                        <div class="toggle-switch <%= config.enableIntentDetection ? 'active' : '' %>" onclick="toggleSetting('enableIntentDetection')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Conversation Memory</div>
+                        <div class="setting-description">Remember past conversations with users</div>
+                    </div>
+                    <div class="setting-control">
+                        <div class="toggle-switch <%= config.enableConversationMemory ? 'active' : '' %>" onclick="toggleSetting('enableConversationMemory')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Smart Suggestions</div>
+                        <div class="setting-description">Provide helpful suggestions and follow-ups</div>
+                    </div>
+                    <div class="setting-control">
+                        <div class="toggle-switch <%= config.enableSmartSuggestions ? 'active' : '' %>" onclick="toggleSetting('enableSmartSuggestions')">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Response Style</div>
+                        <div class="setting-description">Choose the bot's communication style</div>
+                    </div>
+                    <div class="setting-control">
+                        <select class="input-field" id="responseStyle" style="min-width: 150px;">
+                            <option value="friendly" <%= config.responseStyle === 'friendly' ? 'selected' : '' %>>Friendly</option>
+                            <option value="professional" <%= config.responseStyle === 'professional' ? 'selected' : '' %>>Professional</option>
+                            <option value="casual" <%= config.responseStyle === 'casual' ? 'selected' : '' %>>Casual</option>
+                            <option value="creative" <%= config.responseStyle === 'creative' ? 'selected' : '' %>>Creative</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
                 <h3>⏱️ Performance Settings</h3>
                 
                 <div class="setting-item">
@@ -283,7 +362,7 @@
     </div>
     
     <script>
-        let currentConfig = <%= JSON.stringify(config) %>;
+        let currentConfig = <%- JSON.stringify(config) %>;
         
         function toggleSetting(setting) {
             currentConfig[setting] = !currentConfig[setting];

@@ -47,7 +47,7 @@ let stats = {
   hourlyStats: Array(24).fill(0)
 };
 
-// Bot configuration
+// Advanced Bot configuration
 let botConfig = {
   maxMessageLength: 2000,
   responseTimeout: 30000,
@@ -55,7 +55,28 @@ let botConfig = {
   autoRespond: true,
   customGreeting: "Hello! I'm your AI assistant powered by Gemini. How can I help you today?",
   enableAnalytics: true,
-  debugMode: false
+  debugMode: false,
+  
+  // New advanced features
+  enableContextAwareness: true,
+  enableSentimentAnalysis: true,
+  enableIntentDetection: true,
+  responseStyle: 'friendly', // friendly, professional, casual, creative
+  enableEmojis: true,
+  enableSmartSuggestions: true,
+  enableConversationMemory: true,
+  personalityTraits: {
+    humor: 7,
+    empathy: 9,
+    creativity: 8,
+    formality: 3
+  },
+  responseTemplates: {
+    greeting: "Hey there! 👋 I'm your AI assistant. What can I help you with today?",
+    goodbye: "Thanks for chatting! Feel free to message me anytime. Have a great day! 😊",
+    confusion: "I'm not quite sure I understand. Could you rephrase that for me? 🤔",
+    error: "Oops! Something went wrong on my end. Let me try again! 🔄"
+  }
 };
 
 // Reset hourly stats
@@ -181,7 +202,7 @@ app.get('/api/export-stats', (req, res) => {
   res.send(JSON.stringify(exportData, null, 2));
 });
 
-// Enhanced test Gemini endpoint
+// Enhanced test Gemini endpoint with advanced AI features
 app.post('/api/test-gemini', async (req, res) => {
   const startTime = Date.now();
   
@@ -202,26 +223,41 @@ app.post('/api/test-gemini', async (req, res) => {
       });
     }
     
-    const prompt = `${botConfig.customGreeting}\n\nUser message: "${message}"\n\nRespond helpfully and naturally.`;
+    // Create a mock user profile for testing
+    const testUserProfile = {
+      messageCount: 1,
+      conversationHistory: [],
+      preferences: {},
+      sentiment: 'neutral'
+    };
     
-    const result = await Promise.race([
-      model.generateContent(prompt),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Response timeout')), botConfig.responseTimeout)
-      )
-    ]);
-    
-    const response = result.response;
+    // Use enhanced response generation
+    const aiResponse = await generateEnhancedResponse(message, testUserProfile, 'test-user');
     const responseTime = Date.now() - startTime;
+    
+    // Analyze the test interaction
+    const sentiment = analyzeSentiment(message);
+    const intent = detectIntent(message);
     
     stats.responseTypes.success++;
     stats.averageResponseTime = (stats.averageResponseTime + responseTime) / 2;
     
     res.json({ 
       success: true, 
-      response: response.text(),
+      response: aiResponse,
       timestamp: new Date().toISOString(),
-      responseTime
+      responseTime,
+      analysis: {
+        sentiment,
+        intent,
+        messageLength: message.length,
+        responseLength: aiResponse.length
+      },
+      features: {
+        contextAwareness: botConfig.enableContextAwareness,
+        sentimentAnalysis: botConfig.enableSentimentAnalysis,
+        intentDetection: botConfig.enableIntentDetection
+      }
     });
   } catch (error) {
     const responseTime = Date.now() - startTime;
@@ -303,26 +339,41 @@ app.post('/webhook', async (req, res) => {
   }
 });
 
-// Enhanced message handler
+// Enhanced message handler with advanced AI features
 async function handleMessage(senderId, messageText) {
   const startTime = Date.now();
   
   try {
     console.log(`Received message from ${senderId}: ${messageText}`);
     
-    // Update user profile
+    // Update user profile with enhanced tracking
     if (!stats.userProfiles[senderId]) {
       stats.userProfiles[senderId] = {
         firstSeen: new Date(),
         messageCount: 0,
         lastMessage: null,
-        lastSeen: new Date()
+        lastSeen: new Date(),
+        conversationHistory: [],
+        preferences: {},
+        sentiment: 'neutral',
+        topics: []
       };
     }
     
-    stats.userProfiles[senderId].messageCount++;
-    stats.userProfiles[senderId].lastMessage = messageText;
-    stats.userProfiles[senderId].lastSeen = new Date();
+    const userProfile = stats.userProfiles[senderId];
+    userProfile.messageCount++;
+    userProfile.lastMessage = messageText;
+    userProfile.lastSeen = new Date();
+    
+    // Add to conversation history (keep last 10 messages)
+    userProfile.conversationHistory.unshift({
+      message: messageText,
+      timestamp: new Date(),
+      sentiment: analyzeSentiment(messageText)
+    });
+    if (userProfile.conversationHistory.length > 10) {
+      userProfile.conversationHistory = userProfile.conversationHistory.slice(0, 10);
+    }
     
     // Update statistics
     stats.totalMessages++;
@@ -339,7 +390,8 @@ async function handleMessage(senderId, messageText) {
       message: messageText,
       timestamp: new Date(),
       response: null,
-      responseTime: null
+      responseTime: null,
+      sentiment: analyzeSentiment(messageText)
     });
     
     if (stats.recentMessages.length > 50) {
@@ -361,21 +413,11 @@ async function handleMessage(senderId, messageText) {
       await sendTypingIndicator(senderId);
     }
     
-    // Generate response using Gemini
-    const prompt = `${botConfig.customGreeting}\n\nUser message: "${messageText}"\n\nRespond helpfully and naturally. Keep responses concise but helpful.`;
-    
-    const result = await Promise.race([
-      model.generateContent(prompt),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Response timeout')), botConfig.responseTimeout)
-      )
-    ]);
-    
-    const response = result.response;
-    const aiResponse = response.text();
+    // Enhanced AI prompt with context awareness
+    const aiResponse = await generateEnhancedResponse(messageText, userProfile, senderId);
     const responseTime = Date.now() - startTime;
     
-    console.log('AI Response:', aiResponse);
+    console.log('Enhanced AI Response:', aiResponse);
     
     // Update recent messages with response
     if (stats.recentMessages[0]) {
@@ -402,6 +444,155 @@ async function handleMessage(senderId, messageText) {
     
     await sendFacebookMessage(senderId, 'Sorry, I encountered an error processing your message. Please try again.');
   }
+}
+
+// Advanced sentiment analysis
+function analyzeSentiment(text) {
+  const positiveWords = ['happy', 'great', 'awesome', 'amazing', 'love', 'good', 'excellent', 'wonderful', 'fantastic', 'perfect', 'thank you', 'thanks'];
+  const negativeWords = ['sad', 'bad', 'terrible', 'awful', 'hate', 'horrible', 'angry', 'frustrated', 'problem', 'issue', 'error', 'broken'];
+  
+  const words = text.toLowerCase().split(/\s+/);
+  let score = 0;
+  
+  words.forEach(word => {
+    if (positiveWords.includes(word)) score += 1;
+    if (negativeWords.includes(word)) score -= 1;
+  });
+  
+  if (score > 0) return 'positive';
+  if (score < 0) return 'negative';
+  return 'neutral';
+}
+
+// Enhanced AI response generation with context awareness
+async function generateEnhancedResponse(messageText, userProfile, senderId) {
+  try {
+    // Detect message intent
+    const intent = detectIntent(messageText);
+    
+    // Build context from conversation history
+    const conversationContext = userProfile.conversationHistory
+      .slice(0, 3)
+      .map(msg => `User: ${msg.message}`)
+      .join('\n');
+    
+    // Enhanced prompt based on intent and context
+    let enhancedPrompt = '';
+    
+    switch (intent) {
+      case 'greeting':
+        enhancedPrompt = `You are a friendly Facebook bot assistant. The user is greeting you. 
+        ${userProfile.messageCount === 1 ? 'This is their first message.' : `You've talked ${userProfile.messageCount} times before.`}
+        User's message: "${messageText}"
+        Respond warmly and naturally. Ask how you can help them today.`;
+        break;
+        
+      case 'question':
+        enhancedPrompt = `You are a knowledgeable Facebook bot assistant. The user has a question.
+        ${conversationContext ? `Recent conversation:\n${conversationContext}\n` : ''}
+        Current question: "${messageText}"
+        Provide a helpful, accurate, and detailed answer. If you're unsure, say so and suggest alternatives.`;
+        break;
+        
+      case 'help':
+        enhancedPrompt = `You are a helpful Facebook bot assistant. The user needs help.
+        User's request: "${messageText}"
+        Provide clear, step-by-step guidance. Be encouraging and supportive. Offer specific solutions.`;
+        break;
+        
+      case 'complaint':
+        enhancedPrompt = `You are an empathetic Facebook bot assistant. The user seems frustrated or has a complaint.
+        User's message: "${messageText}"
+        Respond with empathy and understanding. Acknowledge their concern and offer to help resolve it.`;
+        break;
+        
+      case 'thanks':
+        enhancedPrompt = `You are a gracious Facebook bot assistant. The user is thanking you.
+        User's message: "${messageText}"
+        Respond humbly and offer continued assistance. Keep it brief but warm.`;
+        break;
+        
+      default:
+        enhancedPrompt = `You are an intelligent Facebook bot assistant powered by Gemini AI.
+        ${conversationContext ? `Recent conversation:\n${conversationContext}\n` : ''}
+        User's current message: "${messageText}"
+        
+        Instructions:
+        - Be conversational and engaging
+        - Show personality while being helpful
+        - Use appropriate emojis sparingly
+        - If the user asks about your capabilities, mention you're powered by Google's Gemini AI
+        - Adapt your tone to match the user's sentiment
+        - Keep responses under 500 characters for better readability
+        - Be creative and informative`;
+    }
+    
+    const result = await Promise.race([
+      model.generateContent(enhancedPrompt),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Response timeout')), botConfig.responseTimeout)
+      )
+    ]);
+    
+    let response = result.response.text();
+    
+    // Post-process response for better formatting
+    response = enhanceResponseFormatting(response, intent);
+    
+    return response;
+    
+  } catch (error) {
+    console.error('Enhanced response generation failed:', error);
+    // Fallback to basic response
+    const fallbackPrompt = `${botConfig.customGreeting}\n\nUser message: "${messageText}"\n\nRespond helpfully and naturally.`;
+    const result = await model.generateContent(fallbackPrompt);
+    return result.response.text();
+  }
+}
+
+// Intent detection for better response targeting
+function detectIntent(messageText) {
+  const text = messageText.toLowerCase();
+  
+  if (/^(hi|hello|hey|good morning|good afternoon|good evening)/.test(text)) {
+    return 'greeting';
+  }
+  
+  if (/\?|how|what|when|where|why|who|can you|could you|would you/.test(text)) {
+    return 'question';
+  }
+  
+  if (/help|assist|support|guide|how to|tutorial/.test(text)) {
+    return 'help';
+  }
+  
+  if /(thank|thanks|thx|appreciate|grateful)/.test(text)) {
+    return 'thanks';
+  }
+  
+  if (/(problem|issue|bug|error|wrong|broken|not working|frustrated|angry)/.test(text)) {
+    return 'complaint';
+  }
+  
+  return 'general';
+}
+
+// Response formatting enhancement
+function enhanceResponseFormatting(response, intent) {
+  // Remove excessive line breaks
+  response = response.replace(/\n{3,}/g, '\n\n');
+  
+  // Ensure responses aren't too long for Facebook
+  if (response.length > 2000) {
+    response = response.substring(0, 1950) + '... (truncated for readability)';
+  }
+  
+  // Add appropriate closing based on intent
+  if (intent === 'help' && !response.includes('?')) {
+    response += '\n\nLet me know if you need any clarification! 😊';
+  }
+  
+  return response.trim();
 }
 
 // Handle postback (for interactive elements)
