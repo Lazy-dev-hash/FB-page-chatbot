@@ -1,13 +1,10 @@
-Adding timestamp to the test response by modifying the credit message.
-```
 
-```replit_final_file
 const express = require('express');
 const bodyParser = require('body-parser');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const path = require('path');
 const fs = require('fs');
-const ytdl = require('ytdl-core');
+const ytdl = require('@distube/ytdl-core');
 const ffmpeg = require('fluent-ffmpeg');
 require('dotenv').config();
 
@@ -83,12 +80,10 @@ let botConfig = {
   customGreeting: "Hello! I'm your AI assistant powered by Gemini. How can I help you today?",
   enableAnalytics: true,
   debugMode: false,
-
-  // New advanced features
   enableContextAwareness: true,
   enableSentimentAnalysis: true,
   enableIntentDetection: true,
-  responseStyle: 'friendly', // friendly, professional, casual, creative
+  responseStyle: 'friendly',
   enableEmojis: true,
   enableSmartSuggestions: true,
   enableConversationMemory: true,
@@ -227,6 +222,72 @@ app.get('/api/export-stats', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Content-Disposition', 'attachment; filename="bot-stats.json"');
   res.send(JSON.stringify(exportData, null, 2));
+});
+
+// YouTube downloader endpoints
+app.post('/api/youtube/info', async (req, res) => {
+  try {
+    const { url } = req.body;
+    
+    if (!url || !ytdl.validateURL(url)) {
+      return res.json({ success: false, error: 'Invalid YouTube URL' });
+    }
+
+    const info = await ytdl.getInfo(url);
+    const videoDetails = {
+      title: info.videoDetails.title,
+      author: info.videoDetails.author.name,
+      lengthSeconds: info.videoDetails.lengthSeconds,
+      viewCount: info.videoDetails.viewCount,
+      description: info.videoDetails.description,
+      thumbnail: info.videoDetails.thumbnails[0]?.url
+    };
+
+    res.json({ success: true, info: videoDetails });
+  } catch (error) {
+    console.error('YouTube info error:', error);
+    res.json({ success: false, error: 'Failed to get video information' });
+  }
+});
+
+app.post('/api/youtube/download', async (req, res) => {
+  try {
+    const { url, format } = req.body;
+    
+    if (!url || !ytdl.validateURL(url)) {
+      return res.json({ success: false, error: 'Invalid YouTube URL' });
+    }
+
+    const info = await ytdl.getInfo(url);
+    const title = info.videoDetails.title.replace(/[^\w\s]/gi, '');
+
+    if (format === 'mp3') {
+      res.setHeader('Content-Disposition', `attachment; filename="${title}.mp3"`);
+      res.setHeader('Content-Type', 'audio/mpeg');
+      
+      const stream = ytdl(url, { quality: 'highestaudio' });
+      ffmpeg(stream)
+        .audioBitrate(128)
+        .format('mp3')
+        .on('error', (err) => {
+          console.error('FFmpeg error:', err);
+          if (!res.headersSent) {
+            res.json({ success: false, error: 'Conversion failed' });
+          }
+        })
+        .pipe(res);
+    } else {
+      res.setHeader('Content-Disposition', `attachment; filename="${title}.mp4"`);
+      res.setHeader('Content-Type', 'video/mp4');
+      
+      ytdl(url, { quality: 'highest' }).pipe(res);
+    }
+  } catch (error) {
+    console.error('YouTube download error:', error);
+    if (!res.headersSent) {
+      res.json({ success: false, error: 'Download failed' });
+    }
+  }
 });
 
 // Enhanced test Gemini endpoint with advanced AI features
@@ -651,7 +712,7 @@ function enhanceResponseFormatting(response, intent) {
 function applyIntelligentFormatting(text) {
   let formattedText = text;
 
-  // 1. Auto-detect and format ANSWERS
+  // Auto-detect and format ANSWERS
   formattedText = formattedText.replace(
     /(?:^|\n)((?:answer|solution|result):\s*)(.*?)(?=\n\n|\n(?:[a-z]*explanation|note|example)|$)/gmi,
     (match, prefix, content) => {
@@ -659,7 +720,7 @@ function applyIntelligentFormatting(text) {
     }
   );
 
-  // 2. Auto-detect and format EXPLANATIONS
+  // Auto-detect and format EXPLANATIONS
   formattedText = formattedText.replace(
     /(?:^|\n)((?:explanation|why|because|how it works):\s*)(.*?)(?=\n\n|\n(?:[a-z]*answer|note|example)|$)/gmi,
     (match, prefix, content) => {
@@ -667,7 +728,7 @@ function applyIntelligentFormatting(text) {
     }
   );
 
-  // 3. Auto-detect and format EXAMPLES
+  // Auto-detect and format EXAMPLES
   formattedText = formattedText.replace(
     /(?:^|\n)((?:example|for instance|e\.?g\.?):\s*)(.*?)(?=\n\n|\n(?:[a-z]*answer|explanation|note)|$)/gmi,
     (match, prefix, content) => {
@@ -675,105 +736,99 @@ function applyIntelligentFormatting(text) {
     }
   );
 
-  // 4. Auto-detect and format NOTES/IMPORTANT INFO
-  formattedText = formattedText.replace(
-    /(?:^|\n)((?:note|important|remember|warning):\s*)(.*?)(?=\n\n|\n(?:[a-z]*answer|explanation|example)|$)/gmi,
-    (match, prefix, content) => {
-      return `\n━━━━━━━━━━━━━━━━━━━━\n**⚠️ IMPORTANT**\n━━━━━━━━━━━━━━━━━━━━\n${content.trim()}\n━━━━━━━━━━━━━━━━━━━━\n`;
-    }
-  );
-
-  // 5. Auto-detect and format STEPS/PROCEDURES
-  formattedText = formattedText.replace(
-    /(?:^|\n)((?:steps|procedure|how to):\s*)(.*?)(?=\n\n|\n(?:[a-z]*answer|explanation|example)|$)/gmi,
-    (match, prefix, content) => {
-      return `\n━━━━━━━━━━━━━━━━━━━━\n**📝 STEPS**\n━━━━━━━━━━━━━━━━━━━━\n${content.trim()}\n━━━━━━━━━━━━━━━━━━━━\n`;
-    }
-  );
-
-  // 6. Auto-detect numbered lists and enhance them
-  formattedText = formattedText.replace(
-    /(\d+\.\s+)([^\n]+)/g,
-    '**$1** $2'
-  );
-
-  // 7. Auto-detect bullet points and enhance them
-  formattedText = formattedText.replace(
-    /^[\s]*[-•*]\s+(.+)$/gm,
-    '🔸 **$1**'
-  );
-
-  // 8. Auto-detect code blocks (inline and block)
-  formattedText = formattedText.replace(
-    /`([^`\n]+)`/g,
-    '**💻 `$1`**'
-  );
-
-  // 9. Auto-detect code blocks (multi-line)
-  formattedText = formattedText.replace(
-    /```([\s\S]*?)```/g,
-    '\n━━━━━━━━━━━━━━━━━━━━\n**💻 CODE**\n━━━━━━━━━━━━━━━━━━━━\n```$1```\n━━━━━━━━━━━━━━━━━━━━\n'
-  );
-
-  // 10. Auto-detect questions and enhance them
-  formattedText = formattedText.replace(
-    /^([^?]*\?)\s*$/gm,
-    '**❓ $1**'
-  );
-
-  // 11. Auto-detect key terms (words in quotes)
-  formattedText = formattedText.replace(
-    /"([^"]+)"/g,
-    '**"$1"**'
-  );
-
-  // 12. Auto-detect definition patterns
-  formattedText = formattedText.replace(
-    /(\b\w+\b)\s+(?:is|means|refers to|defined as)\s+([^.!?]+[.!?])/gi,
-    '**📖 $1:** $2'
-  );
-
-  // 13. Auto-detect pros/cons
-  formattedText = formattedText.replace(
-    /(?:^|\n)((?:pros?|advantages?):\s*)(.*?)(?=\n\n|\n(?:cons?|disadvantages?)|$)/gmi,
-    '\n━━━━━━━━━━━━━━━━━━━━\n**✅ PROS**\n━━━━━━━━━━━━━━━━━━━━\n$2\n━━━━━━━━━━━━━━━━━━━━\n'
-  );
-
-  formattedText = formattedText.replace(
-    /(?:^|\n)((?:cons?|disadvantages?):\s*)(.*?)(?=\n\n|\n(?:pros?|advantages?)|$)/gmi,
-    '\n━━━━━━━━━━━━━━━━━━━━\n**❌ CONS**\n━━━━━━━━━━━━━━━━━━━━\n$2\n━━━━━━━━━━━━━━━━━━━━\n'
-  );
-
-  // 14. Auto-detect tips and tricks
-  formattedText = formattedText.replace(
-    /(?:^|\n)((?:tip|trick|hint):\s*)(.*?)(?=\n\n|\n(?:[a-z]*)|$)/gmi,
-    '\n━━━━━━━━━━━━━━━━━━━━\n**💡 TIP**\n━━━━━━━━━━━━━━━━━━━━\n$2\n━━━━━━━━━━━━━━━━━━━━\n'
-  );
-
-  // 15. Auto-detect summary/conclusion
-  formattedText = formattedText.replace(
-    /(?:^|\n)((?:summary|conclusion|in summary|to summarize):\s*)(.*?)(?=\n\n|$)/gmi,
-    '\n━━━━━━━━━━━━━━━━━━━━\n**📄 SUMMARY**\n━━━━━━━━━━━━━━━━━━━━\n$2\n━━━━━━━━━━━━━━━━━━━━\n'
-  );
-
-  // 16. Auto-detect URLs and format them
-  formattedText = formattedText.replace(
-    /(https?:\/\/[^\s]+)/g,
-    '**🔗 $1**'
-  );
-
-  // 17. Clean up excessive formatting
-  formattedText = formattedText.replace(/━{3,}/g, '━━━━━━━━━━━━━━━━━━━━');
-  formattedText = formattedText.replace(/\n{4,}/g, '\n\n\n');
-
   return formattedText;
 }
 
-// Advanced content type detection
-function detectContentType(text) {
-  const patterns = {
-    answer: /(?:answer|solution|result):/i,
-    explanation: /(?:explanation|why|because|how it works):/i,
-    example: /(?:example|for instance|e\.?g\.?):/i,
-    steps: /(?:steps|procedure|how to):/i,
-    code: /
+// Facebook API functions
+async function sendFacebookMessage(recipientId, message) {
+  try {
+    const PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+    
+    if (!PAGE_ACCESS_TOKEN) {
+      console.error('FACEBOOK_PAGE_ACCESS_TOKEN not configured');
+      return;
+    }
+
+    const axios = require('axios');
+    
+    await axios.post(`https://graph.facebook.com/v18.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, {
+      recipient: { id: recipientId },
+      message: { text: message }
+    });
+
+    console.log('Message sent successfully');
+  } catch (error) {
+    console.error('Error sending Facebook message:', error.response?.data || error.message);
+  }
+}
+
+async function sendTypingIndicator(recipientId) {
+  try {
+    const PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+    
+    if (!PAGE_ACCESS_TOKEN) return;
+
+    const axios = require('axios');
+    
+    await axios.post(`https://graph.facebook.com/v18.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, {
+      recipient: { id: recipientId },
+      sender_action: 'typing_on'
+    });
+  } catch (error) {
+    console.error('Error sending typing indicator:', error.response?.data || error.message);
+  }
+}
+
+async function handlePostback(senderId, payload) {
+  console.log(`Received postback from ${senderId}: ${payload}`);
+  
+  let responseText = 'Thanks for clicking!';
+  
+  switch (payload) {
+    case 'GET_STARTED':
+      responseText = botConfig.responseTemplates.greeting;
+      break;
+    case 'HELP':
+      responseText = 'I can help you with various tasks. Just send me a message!';
+      break;
+    default:
+      responseText = 'I received your message. How can I help you?';
+  }
+  
+  await sendFacebookMessage(senderId, responseText);
+}
+
+// Auto-uptime functionality
+const UPTIME_URL = process.env.UPTIME_URL || `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
+
+if (UPTIME_URL) {
+  setInterval(async () => {
+    try {
+      const axios = require('axios');
+      await axios.get(UPTIME_URL);
+      console.log('✅ Uptime ping successful');
+    } catch (error) {
+      console.log('⚠️ Uptime ping failed:', error.message);
+    }
+  }, 300000); // Ping every 5 minutes
+}
+
+// Start server
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Facebook Bot Server running on port ${PORT}`);
+  console.log(`📊 Dashboard: http://localhost:${PORT}`);
+  console.log(`🧪 Test Interface: http://localhost:${PORT}/test`);
+  console.log(`🔗 Webhook URL: http://localhost:${PORT}/webhook`);
+  
+  if (process.env.GEMINI_API_KEY) {
+    console.log('✅ Gemini AI configured');
+  } else {
+    console.log('⚠️ Gemini AI not configured - add GEMINI_API_KEY to .env');
+  }
+  
+  if (process.env.FACEBOOK_PAGE_ACCESS_TOKEN && process.env.FACEBOOK_VERIFY_TOKEN) {
+    console.log('✅ Facebook integration configured');
+  } else {
+    console.log('⚠️ Facebook integration not configured');
+  }
+});

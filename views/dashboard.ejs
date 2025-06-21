@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -334,15 +333,15 @@
             .header h1 {
                 font-size: 2rem;
             }
-            
+
             .stats-grid {
                 grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             }
-            
+
             .config-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .quick-actions {
                 grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             }
@@ -395,31 +394,31 @@
                 <span class="stat-number"><%= stats.totalMessages %></span>
                 <span class="stat-label">Total Messages</span>
             </div>
-            
+
             <div class="stat-card">
                 <span class="stat-icon">👥</span>
                 <span class="stat-number"><%= stats.totalUsers %></span>
                 <span class="stat-label">Total Users</span>
             </div>
-            
+
             <div class="stat-card">
                 <span class="stat-icon">🟢</span>
                 <span class="stat-number"><%= stats.activeUsers %></span>
                 <span class="stat-label">Active Users</span>
             </div>
-            
+
             <div class="stat-card">
                 <span class="stat-icon">⚡</span>
                 <span class="stat-number"><%= Math.round(stats.averageResponseTime) %>ms</span>
                 <span class="stat-label">Avg Response Time</span>
             </div>
-            
+
             <div class="stat-card">
                 <span class="stat-icon">✅</span>
                 <span class="stat-number"><%= stats.responseTypes.success %></span>
                 <span class="stat-label">Successful Responses</span>
             </div>
-            
+
             <div class="stat-card">
                 <span class="stat-icon">⏰</span>
                 <span class="stat-number"><%= Math.floor(stats.uptime / 3600) %>h</span>
@@ -584,104 +583,68 @@
     </div>
 
     <script>
-        // Auto-refresh stats every 30 seconds
-        setInterval(refreshStats, 30000);
+        let currentView = 'overview';
 
-        async function refreshStats() {
-            try {
-                const response = await fetch('/api/stats');
-                const data = await response.json();
-                
-                // Update stat numbers with animation
-                document.querySelectorAll('.stat-number').forEach((el, index) => {
-                    el.style.opacity = '0.5';
-                    setTimeout(() => {
-                        switch(index) {
-                            case 0: el.textContent = data.totalMessages; break;
-                            case 1: el.textContent = data.totalUsers; break;
-                            case 2: el.textContent = data.activeUsers; break;
-                            case 3: el.textContent = Math.round(data.averageResponseTime) + 'ms'; break;
-                            case 4: el.textContent = data.responseTypes.success; break;
-                            case 5: el.textContent = Math.floor(data.uptime / 3600) + 'h'; break;
-                        }
-                        el.style.opacity = '1';
-                    }, 200);
-                });
-                
-                // Add visual feedback
-                const refreshBtn = document.querySelector('[onclick="refreshStats()"]');
-                if (refreshBtn) {
-                    refreshBtn.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        refreshBtn.style.transform = 'scale(1)';
-                    }, 150);
-                }
-            } catch (error) {
-                console.error('Failed to refresh stats:', error);
+        function showView(view) {
+            document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+            document.getElementById(view + 'View').style.display = 'block';
+
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            const targetLink = document.querySelector(`[onclick="showView('${view}')"]`);
+            if (targetLink) {
+                targetLink.classList.add('active');
             }
+
+            currentView = view;
         }
 
-        // Add loading animations
+        function toggleSetting(setting) {
+            // This would typically make an API call to update the setting
+            showNotification('Setting updated!', 'success');
+        }
+
+        function showNotification(message, type) {
+            type = type || 'info';
+            const notification = document.createElement('div');
+            notification.className = 'notification notification-' + type;
+            notification.innerHTML = '<span>' + message + '</span><button onclick="this.parentElement.remove()">×</button>';
+            document.body.appendChild(notification);
+
+            setTimeout(function() {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function updateStats() {
+            fetch('/api/stats')
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    const totalMsgEl = document.getElementById('totalMessages');
+                    const hourlyMsgEl = document.getElementById('messagesThisHour');
+                    const totalUsersEl = document.getElementById('totalUsers');
+                    const activeUsersEl = document.getElementById('activeUsers');
+
+                    if (totalMsgEl) totalMsgEl.textContent = data.totalMessages || 0;
+                    if (hourlyMsgEl) hourlyMsgEl.textContent = data.messagesThisHour || 0;
+                    if (totalUsersEl) totalUsersEl.textContent = data.totalUsers || 0;
+                    if (activeUsersEl) activeUsersEl.textContent = data.activeUsers || 0;
+                })
+                .catch(function(error) {
+                    console.error('Error updating stats:', error);
+                });
+        }
+
+        // Update stats every 30 seconds
+        setInterval(updateStats, 30000);
+
+        // Initialize the dashboard
         document.addEventListener('DOMContentLoaded', function() {
-            // Animate cards on load
-            document.querySelectorAll('.stat-card, .config-card').forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    card.style.transition = 'all 0.5s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
-            });
-
-            // Add glow effect to online status indicators
-            document.querySelectorAll('.status-online').forEach(indicator => {
-                setInterval(() => {
-                    indicator.style.boxShadow = indicator.style.boxShadow.includes('15px') ? 
-                        '0 0 10px #4CAF50' : '0 0 15px #4CAF50';
-                }, 1000);
-            });
+            showView('overview');
         });
-
-        // Add click ripple effect
-        document.querySelectorAll('.action-btn, .nav-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                const ripple = document.createElement('span');
-                const rect = this.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                const x = e.clientX - rect.left - size / 2;
-                const y = e.clientY - rect.top - size / 2;
-                
-                ripple.style.cssText = `
-                    position: absolute;
-                    width: ${size}px;
-                    height: ${size}px;
-                    left: ${x}px;
-                    top: ${y}px;
-                    background: rgba(255,255,255,0.3);
-                    border-radius: 50%;
-                    pointer-events: none;
-                    transform: scale(0);
-                    animation: ripple 0.6s ease-out;
-                `;
-                
-                this.style.position = 'relative';
-                this.style.overflow = 'hidden';
-                this.appendChild(ripple);
-                
-                setTimeout(() => ripple.remove(), 600);
-            });
-        });
-
-        // Add CSS for ripple animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes ripple {
-                0% { transform: scale(0); opacity: 1; }
-                100% { transform: scale(2); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>
