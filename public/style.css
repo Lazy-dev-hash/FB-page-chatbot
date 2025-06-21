@@ -380,6 +380,209 @@ body {
     transform: none;
 }
 
+/* Enhanced AI Response Formatting Styles */
+.formatting-examples {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.format-example {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.format-example:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.format-title {
+    color: white;
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+.format-desc {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Bot message enhanced formatting */
+.bot-message {
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+/* Auto-formatted sections in messages */
+.bot-message strong {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Section dividers in bot messages */
+.bot-message:contains("━━━") {
+    font-family: 'Courier New', monospace;
+}
+
+/* Enhanced message styling for structured content */
+.structured-response {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.95));
+    border-left: 4px solid #4CAF50;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 10px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.response-section {
+    margin: 15px 0;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(76, 175, 80, 0.1);
+    border-left: 3px solid #4CAF50;
+}
+
+.section-header {
+    font-weight: bold;
+    color: #2E7D32;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-content {
+    color: #333;
+    line-height: 1.5;
+}
+
+/* Code highlighting in messages */
+.code-block {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 12px;
+    font-family: 'Courier New', monospace;
+    margin: 10px 0;
+    overflow-x: auto;
+}
+
+.inline-code {
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+/* List styling in messages */
+.formatted-list {
+    margin: 10px 0;
+    padding-left: 0;
+}
+
+.formatted-list-item {
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: rgba(76, 175, 80, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid #4CAF50;
+}
+
+/* Question highlighting */
+.highlighted-question {
+    color: #1976D2;
+    font-weight: 600;
+    background: rgba(25, 118, 210, 0.1);
+    padding: 8px;
+    border-radius: 6px;
+    margin: 8px 0;
+}
+
+/* Definition styling */
+.definition-term {
+    font-weight: bold;
+    color: #6A1B9A;
+}
+
+.definition-text {
+    font-style: italic;
+    margin-left: 10px;
+}
+
+/* Pros and cons styling */
+.pros-section {
+    background: rgba(76, 175, 80, 0.1);
+    border-left: 4px solid #4CAF50;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 6px;
+}
+
+.cons-section {
+    background: rgba(244, 67, 54, 0.1);
+    border-left: 4px solid #f44336;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 6px;
+}
+
+/* Tip/Note styling */
+.tip-section {
+    background: rgba(255, 193, 7, 0.1);
+    border-left: 4px solid #FFC107;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 6px;
+}
+
+.important-section {
+    background: rgba(255, 152, 0, 0.1);
+    border-left: 4px solid #FF9800;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 6px;
+}
+
+/* URL styling */
+.formatted-url {
+    color: #1976D2;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+/* Divider styling */
+.content-divider {
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right, #4CAF50, transparent);
+    margin: 15px 0;
+}
+
+/* Animation for formatted content */
+@keyframes formatSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.formatted-content {
+    animation: formatSlideIn 0.4s ease-out;
+}
+
 .message-item {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +12,7 @@
             gap: 15px;
             margin-bottom: 30px;
         }
-        
+
         .test-stat {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -22,19 +21,19 @@
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         .test-stat-number {
             display: block;
             color: #4CAF50;
             font-weight: bold;
             font-size: 1.3rem;
         }
-        
+
         .test-stat-label {
             color: rgba(255, 255, 255, 0.8);
             font-size: 0.9rem;
         }
-        
+
         .quick-tests {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -43,18 +42,18 @@
             margin-bottom: 30px;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         .quick-tests h3 {
             color: white;
             margin-bottom: 15px;
         }
-        
+
         .quick-test-buttons {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
-        
+
         .quick-test-btn {
             padding: 10px 15px;
             background: rgba(33, 150, 243, 0.8);
@@ -65,12 +64,12 @@
             font-size: 0.9rem;
             transition: all 0.3s ease;
         }
-        
+
         .quick-test-btn:hover {
             transform: translateY(-2px);
             background: rgba(33, 150, 243, 1);
         }
-        
+
         .typing-indicator {
             display: none;
             padding: 10px 15px;
@@ -79,12 +78,12 @@
             margin: 10px 0;
             max-width: 80px;
         }
-        
+
         .typing-dots {
             display: flex;
             gap: 4px;
         }
-        
+
         .typing-dot {
             width: 8px;
             height: 8px;
@@ -92,27 +91,27 @@
             border-radius: 50%;
             animation: typing 1.4s infinite ease-in-out;
         }
-        
+
         .typing-dot:nth-child(1) { animation-delay: 0s; }
         .typing-dot:nth-child(2) { animation-delay: 0.2s; }
         .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        
+
         @keyframes typing {
             0%, 60%, 100% { opacity: 0.3; }
             30% { opacity: 1; }
         }
-        
+
         .message-timestamp {
             font-size: 0.8rem;
             color: rgba(255, 255, 255, 0.5);
             margin-top: 5px;
         }
-        
+
         .response-time {
             color: #4CAF50;
             font-weight: bold;
         }
-        
+
         .test-config {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -121,7 +120,7 @@
             margin-bottom: 30px;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         .config-item {
             display: flex;
             justify-content: space-between;
@@ -129,10 +128,74 @@
             margin-bottom: 10px;
             color: rgba(255, 255, 255, 0.8);
         }
-        
+
         .config-value {
             color: white;
             font-weight: 500;
+        }
+
+        .formatted-content {
+            color: white;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .formatted-content strong {
+            font-weight: bold;
+            color: #4CAF50; /* Example: Highlight important keywords */
+        }
+
+        .content-divider {
+            border: none;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 15px 0;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            color: #f8f8f2;
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: monospace;
+        }
+
+        .inline-code {
+            background: rgba(0, 0, 0, 0.3);
+            color: #f8f8f2;
+            padding: 3px 5px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+
+        .formatted-url {
+            color: #2196F3;
+            text-decoration: none;
+        }
+
+        .formatted-list-item {
+            margin-bottom: 5px;
+            padding-left: 1.5em;
+            text-indent: -1.5em;
+        }
+
+        .formatting-examples .format-example {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .formatting-examples .format-title {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .formatting-examples .format-desc {
+            color: rgba(255, 255, 255, 0.7);
         }
     </style>
 </head>
@@ -142,7 +205,7 @@
             <h1>🧪 Bot Testing Lab</h1>
             <p>Test your bot's AI responses in real-time</p>
         </div>
-        
+
         <div class="nav-menu">
             <div class="nav-links">
                 <a href="/" class="nav-link">📊 Dashboard</a>
@@ -153,7 +216,7 @@
                 <a href="/test" class="nav-link active">🧪 Test Bot</a>
             </div>
         </div>
-        
+
         <div class="test-stats">
             <div class="test-stat">
                 <span class="test-stat-number" id="testCount">0</span>
@@ -168,7 +231,7 @@
                 <span class="test-stat-label">Success Rate</span>
             </div>
         </div>
-        
+
         <div class="test-config">
             <h3 style="color: white; margin-bottom: 15px;">🔧 Current Configuration</h3>
             <div class="config-item">
@@ -184,7 +247,7 @@
                 <span class="config-value"><%= config.maxMessageLength %> chars</span>
             </div>
         </div>
-        
+
         <div class="quick-tests">
             <h3>⚡ Quick Test Messages</h3>
             <div class="quick-test-buttons">
@@ -198,7 +261,7 @@
                 <button class="quick-test-btn" onclick="sendQuickTest('Thank you so much!')">🙏 Thanks</button>
             </div>
         </div>
-        
+
         <div class="test-config">
             <h3 style="color: white; margin-bottom: 15px;">🔬 AI Analysis Features</h3>
             <div id="aiAnalysis" style="display: none; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 15px;">
@@ -218,15 +281,22 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="chat-container">
             <div class="chat-messages" id="chatMessages">
                 <div class="message bot-message">
-                    <div>👋 Welcome to the Bot Testing Lab! I'm your Facebook bot powered by Gemini AI.</div>
-                    <div class="message-timestamp">Ready to test • Click quick tests or type your own message</div>
+                    👋 Hello! I'm your AI assistant powered by Gemini with **enhanced formatting**! 
+
+                    Try these example prompts to see auto-formatting:
+
+                    🔸 **"What is JavaScript?"** (gets definition formatting)
+                    🔸 **"How to learn programming?"** (gets steps formatting) 
+                    🔸 **"Explain variables in Python"** (gets explanation formatting)
+                    🔸 **"Give me an example of a loop"** (gets example formatting)
+                    🔸 **"What are the pros and cons of React?"** (gets pros/cons formatting)
                 </div>
             </div>
-            
+
             <div class="typing-indicator" id="typingIndicator">
                 <div class="typing-dots">
                     <div class="typing-dot"></div>
@@ -234,25 +304,53 @@
                     <div class="typing-dot"></div>
                 </div>
             </div>
-            
-            <div class="loading" id="loading">
-                🤖 Bot is thinking...
-            </div>
-            
+
+            <div class="loading" id="loading">🤖 AI is thinking and formatting response...</div>
+
             <div class="error" id="error"></div>
-            
+
             <div class="input-container">
                 <input type="text" class="message-input" id="messageInput" placeholder="Type your test message here..." maxlength="<%= config.maxMessageLength %>">
                 <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
             </div>
         </div>
-        
+
+        <div class="formatting-examples" style="margin-top: 30px;">
+            <h3 style="color: white; margin-bottom: 15px;">✨ Auto-Formatting Features</h3>
+            <div class="formatting-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div class="format-example">
+                    <div class="format-title">📋 Answers</div>
+                    <div class="format-desc">Auto-detects "Answer:" and applies bold formatting</div>
+                </div>
+                <div class="format-example">
+                    <div class="format-title">💡 Explanations</div>
+                    <div class="format-desc">Auto-detects "Explanation:" and adds section dividers</div>
+                </div>
+                <div class="format-example">
+                    <div class="format-title">🔍 Examples</div>
+                    <div class="format-desc">Auto-detects "Example:" and highlights code</div>
+                </div>
+                <div class="format-example">
+                    <div class="format-title">📝 Steps</div>
+                    <div class="format-desc">Auto-detects numbered lists and procedures</div>
+                </div>
+                <div class="format-example">
+                    <div class="format-title">⚠️ Important Notes</div>
+                    <div class="format-desc">Auto-detects warnings and key information</div>
+                </div>
+                <div class="format-example">
+                    <div class="format-title">✅❌ Pros & Cons</div>
+                    <div class="format-desc">Auto-separates advantages and disadvantages</div>
+                </div>
+            </div>
+        </div>
+
         <div class="buttons">
             <a href="/" class="btn btn-primary">← Back to Dashboard</a>
             <button onclick="clearChat()" class="btn btn-success">🗑️ Clear Chat</button>
         </div>
     </div>
-    
+
     <script>
         const chatMessages = document.getElementById('chatMessages');
         const messageInput = document.getElementById('messageInput');
@@ -260,24 +358,31 @@
         const loading = document.getElementById('loading');
         const typingIndicator = document.getElementById('typingIndicator');
         const errorDiv = document.getElementById('error');
-        
+
         let testStats = {
             count: 0,
             totalResponseTime: 0,
             successCount: 0
         };
-        
+
         function addMessage(message, isUser = false, responseTime = null) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'} fade-in`;
-            
+
             const messageContent = document.createElement('div');
-            messageContent.textContent = message;
+
+            if (!isUser) {
+                // Apply enhanced formatting for bot messages
+                messageContent.innerHTML = formatBotMessage(message);
+            } else {
+                messageContent.textContent = message;
+            }
+
             messageDiv.appendChild(messageContent);
-            
+
             const timestamp = document.createElement('div');
             timestamp.className = 'message-timestamp';
-            
+
             if (isUser) {
                 timestamp.textContent = new Date().toLocaleTimeString();
             } else if (responseTime) {
@@ -285,12 +390,40 @@
             } else {
                 timestamp.textContent = new Date().toLocaleTimeString();
             }
-            
+
             messageDiv.appendChild(timestamp);
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
-        
+
+        function formatBotMessage(message) {
+            // Convert markdown-style formatting to HTML
+            let formatted = message;
+
+            // Handle section dividers
+            formatted = formatted.replace(/━{10,}/g, '<hr class="content-divider">');
+
+            // Handle bold text (**text**)
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            // Handle code blocks (```code```)
+            formatted = formatted.replace(/```([\s\S]*?)```/g, '<div class="code-block">$1</div>');
+
+            // Handle inline code (`code`)
+            formatted = formatted.replace(/`([^`]+)`/g, '<span class="inline-code">$1</span>');
+
+            // Handle URLs
+            formatted = formatted.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" class="formatted-url" target="_blank">$1</a>');
+
+            // Handle bullet points
+            formatted = formatted.replace(/🔸\s+(.*?)(?=\n|$)/g, '<div class="formatted-list-item">$1</div>');
+
+            // Handle line breaks
+            formatted = formatted.replace(/\n/g, '<br>');
+
+            return formatted;
+        }
+
         function showError(message) {
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
@@ -298,7 +431,7 @@
                 errorDiv.style.display = 'none';
             }, 5000);
         }
-        
+
         function updateStats() {
             document.getElementById('testCount').textContent = testStats.count;
             document.getElementById('avgResponseTime').textContent = 
@@ -306,27 +439,27 @@
             document.getElementById('successRate').textContent = 
                 testStats.count > 0 ? Math.round(testStats.successCount / testStats.count * 100) + '%' : '100%';
         }
-        
+
         async function sendMessage(message = null) {
             const testMessage = message || messageInput.value.trim();
             if (!testMessage) return;
-            
+
             // Add user message
             addMessage(testMessage, true);
             if (!message) messageInput.value = '';
-            
+
             // Show typing indicator
             if (<%= config.enableTypingIndicator %>) {
                 typingIndicator.style.display = 'block';
             } else {
                 loading.style.display = 'block';
             }
-            
+
             sendBtn.disabled = true;
             testStats.count++;
-            
+
             const startTime = Date.now();
-            
+
             try {
                 const response = await fetch('/api/test-gemini', {
                     method: 'POST',
@@ -335,15 +468,15 @@
                     },
                     body: JSON.stringify({ message: testMessage })
                 });
-                
+
                 const data = await response.json();
                 const responseTime = Date.now() - startTime;
-                
+
                 if (data.success) {
                     addMessage(data.response, false, responseTime);
                     testStats.successCount++;
                     testStats.totalResponseTime += responseTime;
-                    
+
                     // Show AI analysis if available
                     if (data.analysis) {
                         showAIAnalysis(data.analysis);
@@ -364,15 +497,15 @@
                 updateStats();
             }
         }
-        
+
         function sendQuickTest(message) {
             sendMessage(message);
         }
-        
+
         function clearChat() {
             const messages = chatMessages.querySelectorAll('.message:not(:first-child)');
             messages.forEach(msg => msg.remove());
-            
+
             testStats = {
                 count: 0,
                 totalResponseTime: 0,
@@ -380,14 +513,14 @@
             };
             updateStats();
         }
-        
+
         // Enter key to send message
         messageInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !sendBtn.disabled) {
                 sendMessage();
             }
         });
-        
+
         // Character counter
         messageInput.addEventListener('input', function() {
             const remaining = <%= config.maxMessageLength %> - this.value.length;
@@ -397,33 +530,33 @@
                 this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
             }
         });
-        
+
         function showAIAnalysis(analysis) {
             const analysisDiv = document.getElementById('aiAnalysis');
             const sentimentSpan = document.getElementById('detectedSentiment');
             const intentSpan = document.getElementById('detectedIntent');
             const lengthSpan = document.getElementById('responseLength');
-            
+
             // Update sentiment with color coding
             sentimentSpan.textContent = analysis.sentiment.toUpperCase();
             sentimentSpan.style.color = analysis.sentiment === 'positive' ? '#4CAF50' : 
                                        analysis.sentiment === 'negative' ? '#f44336' : '#ff9800';
-            
+
             // Update intent
             intentSpan.textContent = analysis.intent.toUpperCase();
-            
+
             // Update response length
             lengthSpan.textContent = `${analysis.responseLength} chars`;
-            
+
             // Show the analysis
             analysisDiv.style.display = 'block';
-            
+
             // Auto-hide after 10 seconds
             setTimeout(() => {
                 analysisDiv.style.display = 'none';
             }, 10000);
         }
-        
+
         // Focus input on load
         messageInput.focus();
     </script>

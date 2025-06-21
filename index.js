@@ -543,9 +543,15 @@ async function generateEnhancedResponse(messageText, userProfile, senderId) {
         - Be conversational and engaging
         - Show personality while being helpful
         - Use appropriate emojis sparingly
+        - Structure your responses clearly using sections like:
+          * Answer: [direct answer]
+          * Explanation: [detailed explanation]
+          * Example: [if applicable]
+          * Note: [important points]
+          * Tips: [helpful suggestions]
         - If the user asks about your capabilities, mention you're powered by Google's Gemini AI
         - Adapt your tone to match the user's sentiment
-        - Keep responses under 500 characters for better readability
+        - When providing complex information, organize it with clear headings
         - Be creative and informative`;
     }
     
@@ -599,10 +605,13 @@ function detectIntent(messageText) {
   return 'general';
 }
 
-// Response formatting enhancement
+// Enhanced AI Response Formatting with Auto-Detection
 function enhanceResponseFormatting(response, intent) {
   // Remove excessive line breaks
   response = response.replace(/\n{3,}/g, '\n\n');
+  
+  // Intelligent content detection and formatting
+  response = applyIntelligentFormatting(response);
   
   // Ensure responses aren't too long for Facebook
   if (response.length > 2000) {
@@ -615,6 +624,157 @@ function enhanceResponseFormatting(response, intent) {
   }
   
   return response.trim();
+}
+
+// Intelligent content formatting with auto-detection
+function applyIntelligentFormatting(text) {
+  let formattedText = text;
+  
+  // 1. Auto-detect and format ANSWERS
+  formattedText = formattedText.replace(
+    /(?:^|\n)((?:answer|solution|result):\s*)(.*?)(?=\n\n|\n(?:[a-z]*explanation|note|example)|$)/gmi,
+    (match, prefix, content) => {
+      return `\n━━━━━━━━━━━━━━━━━━━━\n**📋 ANSWER**\n━━━━━━━━━━━━━━━━━━━━\n${content.trim()}\n━━━━━━━━━━━━━━━━━━━━\n`;
+    }
+  );
+  
+  // 2. Auto-detect and format EXPLANATIONS
+  formattedText = formattedText.replace(
+    /(?:^|\n)((?:explanation|why|because|how it works):\s*)(.*?)(?=\n\n|\n(?:[a-z]*answer|note|example)|$)/gmi,
+    (match, prefix, content) => {
+      return `\n━━━━━━━━━━━━━━━━━━━━\n**💡 EXPLANATION**\n━━━━━━━━━━━━━━━━━━━━\n${content.trim()}\n━━━━━━━━━━━━━━━━━━━━\n`;
+    }
+  );
+  
+  // 3. Auto-detect and format EXAMPLES
+  formattedText = formattedText.replace(
+    /(?:^|\n)((?:example|for instance|e\.?g\.?):\s*)(.*?)(?=\n\n|\n(?:[a-z]*answer|explanation|note)|$)/gmi,
+    (match, prefix, content) => {
+      return `\n━━━━━━━━━━━━━━━━━━━━\n**🔍 EXAMPLE**\n━━━━━━━━━━━━━━━━━━━━\n${content.trim()}\n━━━━━━━━━━━━━━━━━━━━\n`;
+    }
+  );
+  
+  // 4. Auto-detect and format NOTES/IMPORTANT INFO
+  formattedText = formattedText.replace(
+    /(?:^|\n)((?:note|important|remember|warning):\s*)(.*?)(?=\n\n|\n(?:[a-z]*answer|explanation|example)|$)/gmi,
+    (match, prefix, content) => {
+      return `\n━━━━━━━━━━━━━━━━━━━━\n**⚠️ IMPORTANT**\n━━━━━━━━━━━━━━━━━━━━\n${content.trim()}\n━━━━━━━━━━━━━━━━━━━━\n`;
+    }
+  );
+  
+  // 5. Auto-detect and format STEPS/PROCEDURES
+  formattedText = formattedText.replace(
+    /(?:^|\n)((?:steps|procedure|how to):\s*)(.*?)(?=\n\n|\n(?:[a-z]*answer|explanation|example)|$)/gmi,
+    (match, prefix, content) => {
+      return `\n━━━━━━━━━━━━━━━━━━━━\n**📝 STEPS**\n━━━━━━━━━━━━━━━━━━━━\n${content.trim()}\n━━━━━━━━━━━━━━━━━━━━\n`;
+    }
+  );
+  
+  // 6. Auto-detect numbered lists and enhance them
+  formattedText = formattedText.replace(
+    /(\d+\.\s+)([^\n]+)/g,
+    '**$1** $2'
+  );
+  
+  // 7. Auto-detect bullet points and enhance them
+  formattedText = formattedText.replace(
+    /^[\s]*[-•*]\s+(.+)$/gm,
+    '🔸 **$1**'
+  );
+  
+  // 8. Auto-detect code blocks (inline and block)
+  formattedText = formattedText.replace(
+    /`([^`\n]+)`/g,
+    '**💻 `$1`**'
+  );
+  
+  // 9. Auto-detect code blocks (multi-line)
+  formattedText = formattedText.replace(
+    /```([\s\S]*?)```/g,
+    '\n━━━━━━━━━━━━━━━━━━━━\n**💻 CODE**\n━━━━━━━━━━━━━━━━━━━━\n```$1```\n━━━━━━━━━━━━━━━━━━━━\n'
+  );
+  
+  // 10. Auto-detect questions and enhance them
+  formattedText = formattedText.replace(
+    /^([^?]*\?)\s*$/gm,
+    '**❓ $1**'
+  );
+  
+  // 11. Auto-detect key terms (words in quotes)
+  formattedText = formattedText.replace(
+    /"([^"]+)"/g,
+    '**"$1"**'
+  );
+  
+  // 12. Auto-detect definition patterns
+  formattedText = formattedText.replace(
+    /(\b\w+\b)\s+(?:is|means|refers to|defined as)\s+([^.!?]+[.!?])/gi,
+    '**📖 $1:** $2'
+  );
+  
+  // 13. Auto-detect pros/cons
+  formattedText = formattedText.replace(
+    /(?:^|\n)((?:pros?|advantages?):\s*)(.*?)(?=\n\n|\n(?:cons?|disadvantages?)|$)/gmi,
+    '\n━━━━━━━━━━━━━━━━━━━━\n**✅ PROS**\n━━━━━━━━━━━━━━━━━━━━\n$2\n━━━━━━━━━━━━━━━━━━━━\n'
+  );
+  
+  formattedText = formattedText.replace(
+    /(?:^|\n)((?:cons?|disadvantages?):\s*)(.*?)(?=\n\n|\n(?:pros?|advantages?)|$)/gmi,
+    '\n━━━━━━━━━━━━━━━━━━━━\n**❌ CONS**\n━━━━━━━━━━━━━━━━━━━━\n$2\n━━━━━━━━━━━━━━━━━━━━\n'
+  );
+  
+  // 14. Auto-detect tips and tricks
+  formattedText = formattedText.replace(
+    /(?:^|\n)((?:tip|trick|hint):\s*)(.*?)(?=\n\n|\n(?:[a-z]*)|$)/gmi,
+    '\n━━━━━━━━━━━━━━━━━━━━\n**💡 TIP**\n━━━━━━━━━━━━━━━━━━━━\n$2\n━━━━━━━━━━━━━━━━━━━━\n'
+  );
+  
+  // 15. Auto-detect summary/conclusion
+  formattedText = formattedText.replace(
+    /(?:^|\n)((?:summary|conclusion|in summary|to summarize):\s*)(.*?)(?=\n\n|$)/gmi,
+    '\n━━━━━━━━━━━━━━━━━━━━\n**📄 SUMMARY**\n━━━━━━━━━━━━━━━━━━━━\n$2\n━━━━━━━━━━━━━━━━━━━━\n'
+  );
+  
+  // 16. Auto-detect URLs and format them
+  formattedText = formattedText.replace(
+    /(https?:\/\/[^\s]+)/g,
+    '**🔗 $1**'
+  );
+  
+  // 17. Clean up excessive formatting
+  formattedText = formattedText.replace(/━{3,}/g, '━━━━━━━━━━━━━━━━━━━━');
+  formattedText = formattedText.replace(/\n{4,}/g, '\n\n\n');
+  
+  return formattedText;
+}
+
+// Advanced content type detection
+function detectContentType(text) {
+  const patterns = {
+    answer: /(?:answer|solution|result):/i,
+    explanation: /(?:explanation|why|because|how it works):/i,
+    example: /(?:example|for instance|e\.?g\.?):/i,
+    steps: /(?:steps|procedure|how to):/i,
+    code: /```|`[^`]+`/,
+    question: /\?$/m,
+    list: /^[\s]*(?:\d+\.|[-•*])\s+/m,
+    definition: /\b\w+\b\s+(?:is|means|refers to|defined as)\s+/i,
+    pros: /(?:pros?|advantages?):/i,
+    cons: /(?:cons?|disadvantages?):/i,
+    tip: /(?:tip|trick|hint):/i,
+    note: /(?:note|important|remember|warning):/i,
+    summary: /(?:summary|conclusion|in summary|to summarize):/i
+  };
+  
+  const detected = [];
+  
+  for (const [type, pattern] of Object.entries(patterns)) {
+    if (pattern.test(text)) {
+      detected.push(type);
+    }
+  }
+  
+  return detected;
 }
 
 // Handle postback (for interactive elements)
