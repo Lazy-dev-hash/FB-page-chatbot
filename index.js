@@ -9,14 +9,36 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Initialize Gemini AI
+// Initialize Gemini AI with enhanced error handling
 let genAI, model;
-try {
-  genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-} catch (error) {
-  console.error('Error initializing Gemini AI:', error.message);
+let geminiHealthy = false;
+
+async function initializeGemini() {
+  try {
+    if (!process.env.GEMINI_API_KEY) {
+      console.warn('⚠️ GEMINI_API_KEY not found in environment variables');
+      return false;
+    }
+    
+    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    
+    // Test the connection
+    const testResult = await model.generateContent("Hello");
+    if (testResult.response.text()) {
+      geminiHealthy = true;
+      console.log('✅ Gemini AI initialized successfully');
+      return true;
+    }
+  } catch (error) {
+    console.error('❌ Error initializing Gemini AI:', error.message);
+    geminiHealthy = false;
+    return false;
+  }
 }
+
+// Initialize Gemini on startup
+initializeGemini();
 
 // Middleware
 app.use(bodyParser.json());
@@ -566,7 +588,7 @@ function detectIntent(messageText) {
     return 'help';
   }
   
-  if /(thank|thanks|thx|appreciate|grateful)/.test(text)) {
+  if (/(thank|thanks|thx|appreciate|grateful)/.test(text)) {
     return 'thanks';
   }
   
@@ -709,12 +731,58 @@ app.post('/api/broadcast', async (req, res) => {
   }
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  const health = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    gemini: geminiHealthy,
+    facebook: !!(process.env.FACEBOOK_PAGE_ACCESS_TOKEN && process.env.FACEBOOK_VERIFY_TOKEN),
+    environment: process.env.NODE_ENV || 'development'
+  };
+  
+  res.json(health);
+});
+
+// System monitoring
+setInterval(async () => {
+  const memUsage = process.memoryUsage();
+  if (memUsage.heapUsed > 100 * 1024 * 1024) { // 100MB
+    console.warn('⚠️ High memory usage detected:', Math.round(memUsage.heapUsed / 1024 / 1024) + 'MB');
+  }
+  
+  // Reconnect Gemini if needed
+  if (!geminiHealthy) {
+    console.log('🔄 Attempting to reconnect to Gemini AI...');
+    await initializeGemini();
+  }
+}, 60000); // Check every minute
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('📴 Received SIGTERM, shutting down gracefully...');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('📴 Received SIGINT, shutting down gracefully...');
+  process.exit(0);
+});
+
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🤖 Facebook Bot server is running on port ${PORT}`);
-  console.log(`📊 Dashboard: http://localhost:${PORT}`);
-  console.log(`🧪 Test Interface: http://localhost:${PORT}/test`);
-  console.log(`📈 Analytics: http://localhost:${PORT}/analytics`);
-  console.log(`👥 Users: http://localhost:${PORT}/users`);
-  console.log(`📋 Logs: http://localhost:${PORT}/logs`);
-  console.log(`⚙️ Settings: http://localhost:${PORT}/settings`);
+  console.log('🚀 ================================');
+  console.log(`🤖 Facebook Bot Server Started`);
+  console.log(`📡 Port: ${PORT}`);
+  console.log(`🌐 Dashboard: http://0.0.0.0:${PORT}`);
+  console.log(`🧪 Test Interface: http://0.0.0.0:${PORT}/test`);
+  console.log(`📈 Analytics: http://0.0.0.0:${PORT}/analytics`);
+  console.log(`👥 Users: http://0.0.0.0:${PORT}/users`);
+  console.log(`📋 Logs: http://0.0.0.0:${PORT}/logs`);
+  console.log(`⚙️ Settings: http://0.0.0.0:${PORT}/settings`);
+  console.log(`💚 Health: http://0.0.0.0:${PORT}/health`);
+  console.log('🚀 ================================');
+  console.log(`💝 Created with 🤍 by Sunnel John Rebano`);
+  console.log('🚀 ================================');
 });
