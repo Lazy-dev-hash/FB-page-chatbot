@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const path = require('path');
 const fs = require('fs');
+const ytdl = require('ytdl-core');
+const ffmpeg = require('fluent-ffmpeg');
 require('dotenv').config();
 
 const app = express();
@@ -264,9 +266,12 @@ app.post('/api/test-gemini', async (req, res) => {
     stats.responseTypes.success++;
     stats.averageResponseTime = (stats.averageResponseTime + responseTime) / 2;
     
+    // Add credit message to test response
+    const responseWithCredit = aiResponse + '\n\n━━━━━━━━━━━━━━━━━━━━\n💝 Created with 🤍 by Sunnel John Rebano\n━━━━━━━━━━━━━━━━━━━━';
+    
     res.json({ 
       success: true, 
-      response: aiResponse,
+      response: responseWithCredit,
       timestamp: new Date().toISOString(),
       responseTime,
       analysis: {
@@ -450,8 +455,11 @@ async function handleMessage(senderId, messageText) {
     stats.responseTypes.success++;
     stats.averageResponseTime = (stats.averageResponseTime + responseTime) / 2;
     
+    // Add credit message to response
+    const responseWithCredit = aiResponse + '\n\n━━━━━━━━━━━━━━━━━━━━\n💝 Created with 🤍 by Sunnel John Rebano\n━━━━━━━━━━━━━━━━━━━━';
+    
     // Send response back to Facebook
-    await sendFacebookMessage(senderId, aiResponse);
+    await sendFacebookMessage(senderId, responseWithCredit);
     
   } catch (error) {
     console.error('Error handling message:', error);
@@ -891,6 +899,98 @@ app.post('/api/broadcast', async (req, res) => {
   }
 });
 
+// YouTube to MP3 converter
+app.post('/api/youtube-mp3', async (req, res) => {
+  try {
+    const { url } = req.body;
+    
+    if (!url || !ytdl.validateURL(url)) {
+      return res.json({ success: false, error: 'Invalid YouTube URL' });
+    }
+    
+    const info = await ytdl.getInfo(url);
+    const title = info.videoDetails.title.replace(/[^\w\s]/gi, '');
+    
+    res.setHeader('Content-Disposition', `attachment; filename="${title}.mp3"`);
+    res.setHeader('Content-Type', 'audio/mpeg');
+    
+    const audioStream = ytdl(url, {
+      filter: 'audioonly',
+      quality: 'highestaudio'
+    });
+    
+    ffmpeg(audioStream)
+      .audioBitrate(128)
+      .format('mp3')
+      .on('error', (err) => {
+        console.error('FFmpeg error:', err);
+        if (!res.headersSent) {
+          res.json({ success: false, error: 'Conversion failed' });
+        }
+      })
+      .pipe(res);
+      
+  } catch (error) {
+    console.error('YouTube MP3 error:', error);
+    res.json({ success: false, error: error.message });
+  }
+});
+
+// YouTube video downloader
+app.post('/api/youtube-video', async (req, res) => {
+  try {
+    const { url, quality = 'highest' } = req.body;
+    
+    if (!url || !ytdl.validateURL(url)) {
+      return res.json({ success: false, error: 'Invalid YouTube URL' });
+    }
+    
+    const info = await ytdl.getInfo(url);
+    const title = info.videoDetails.title.replace(/[^\w\s]/gi, '');
+    
+    res.setHeader('Content-Disposition', `attachment; filename="${title}.mp4"`);
+    res.setHeader('Content-Type', 'video/mp4');
+    
+    const videoStream = ytdl(url, {
+      quality: quality,
+      filter: 'videoandaudio'
+    });
+    
+    videoStream.pipe(res);
+    
+  } catch (error) {
+    console.error('YouTube video error:', error);
+    res.json({ success: false, error: error.message });
+  }
+});
+
+// YouTube info endpoint
+app.post('/api/youtube-info', async (req, res) => {
+  try {
+    const { url } = req.body;
+    
+    if (!url || !ytdl.validateURL(url)) {
+      return res.json({ success: false, error: 'Invalid YouTube URL' });
+    }
+    
+    const info = await ytdl.getInfo(url);
+    const videoDetails = {
+      title: info.videoDetails.title,
+      duration: info.videoDetails.lengthSeconds,
+      thumbnail: info.videoDetails.thumbnails[0]?.url,
+      description: info.videoDetails.description?.substring(0, 200) + '...',
+      author: info.videoDetails.author.name,
+      viewCount: info.videoDetails.viewCount
+    };
+    
+    res.json({ success: true, video: videoDetails });
+    
+  } catch (error) {
+    console.error('YouTube info error:', error);
+    res.json({ success: false, error: error.message });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   const health = {
@@ -905,6 +1005,24 @@ app.get('/health', (req, res) => {
   
   res.json(health);
 });
+
+// Auto-uptime system for 24/7 operation
+const keepAlive = () => {
+  const axios = require('axios');
+  const url = process.env.REPL_URL || `http://localhost:${PORT}`;
+  
+  setInterval(async () => {
+    try {
+      await axios.get(`${url}/health`);
+      console.log('🔄 Auto-uptime ping successful');
+    } catch (error) {
+      console.log('⚠️ Auto-uptime ping failed:', error.message);
+    }
+  }, 240000); // Ping every 4 minutes to keep alive
+};
+
+// Start auto-uptime system
+keepAlive();
 
 // System monitoring
 setInterval(async () => {

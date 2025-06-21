@@ -1,82 +1,245 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Facebook Bot</title>
+    <title>🚀 AI Bot Messenger</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-        .test-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .test-stat {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .test-stat-number {
-            display: block;
-            color: #4CAF50;
-            font-weight: bold;
-            font-size: 1.3rem;
-        }
-
-        .test-stat-label {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-        }
-
-        .quick-tests {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .quick-tests h3 {
-            color: white;
-            margin-bottom: 15px;
-        }
-
-        .quick-test-buttons {
+        .messenger-container {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 50px rgba(0,0,0,0.3);
         }
 
-        .quick-test-btn {
-            padding: 10px 15px;
-            background: rgba(33, 150, 243, 0.8);
+        .sidebar {
+            width: 320px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .sidebar-title {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            text-align: center;
+        }
+
+        .sidebar-subtitle {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            text-align: center;
+            margin: 5px 0 0 0;
+        }
+
+        .tools-section {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .tool-category {
+            margin-bottom: 25px;
+        }
+
+        .tool-category h3 {
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quick-action-btn {
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.1);
             color: white;
             border: none;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-align: left;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .youtube-section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .youtube-input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.9);
+            font-size: 14px;
+        }
+
+        .youtube-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .youtube-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
             transition: all 0.3s ease;
         }
 
-        .quick-test-btn:hover {
-            transform: translateY(-2px);
-            background: rgba(33, 150, 243, 1);
+        .youtube-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bot-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .bot-info h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .bot-status {
+            font-size: 12px;
+            color: #4CAF50;
+        }
+
+        .chat-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message-group {
+            margin-bottom: 20px;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 4px;
+            word-wrap: break-word;
+            animation: messageSlideIn 0.3s ease-out;
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot-message {
+            background: white;
+            color: #333;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            line-height: 1.4;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            text-align: center;
+            margin: 8px 0;
         }
 
         .typing-indicator {
+            background: white;
+            border-radius: 18px;
+            padding: 12px 16px;
+            margin-right: auto;
+            max-width: 60px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             display: none;
-            padding: 10px 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            margin: 10px 0;
-            max-width: 80px;
         }
 
         .typing-dots {
@@ -87,7 +250,7 @@
         .typing-dot {
             width: 8px;
             height: 8px;
-            background: rgba(255, 255, 255, 0.6);
+            background: #ccc;
             border-radius: 50%;
             animation: typing 1.4s infinite ease-in-out;
         }
@@ -97,203 +260,246 @@
         .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
         @keyframes typing {
-            0%, 60%, 100% { opacity: 0.3; }
-            30% { opacity: 1; }
+            0%, 60%, 100% { opacity: 0.3; transform: scale(1); }
+            30% { opacity: 1; transform: scale(1.2); }
         }
 
-        .message-timestamp {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 5px;
-        }
-
-        .response-time {
-            color: #4CAF50;
-            font-weight: bold;
-        }
-
-        .test-config {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
+        .input-area {
             padding: 20px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: white;
+            border-top: 1px solid #e0e0e0;
         }
 
-        .config-item {
+        .input-container {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            color: rgba(255, 255, 255, 0.8);
+            align-items: flex-end;
+            gap: 12px;
+            background: #f8f9fa;
+            border-radius: 25px;
+            padding: 8px;
         }
 
-        .config-value {
-            color: white;
-            font-weight: 500;
-        }
-
-        .formatted-content {
-            color: white;
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-
-        .formatted-content strong {
-            font-weight: bold;
-            color: #4CAF50; /* Example: Highlight important keywords */
-        }
-
-        .content-divider {
+        .message-input {
+            flex: 1;
             border: none;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.2);
-            margin: 15px 0;
+            background: transparent;
+            padding: 12px 16px;
+            font-size: 15px;
+            outline: none;
+            resize: none;
+            min-height: 20px;
+            max-height: 100px;
+            font-family: inherit;
         }
 
-        .code-block {
-            background: rgba(0, 0, 0, 0.5);
-            color: #f8f8f2;
-            padding: 10px;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-family: monospace;
+        .send-button {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
         }
 
-        .inline-code {
-            background: rgba(0, 0, 0, 0.3);
-            color: #f8f8f2;
-            padding: 3px 5px;
-            border-radius: 5px;
-            font-family: monospace;
+        .send-button:hover {
+            transform: scale(1.1);
         }
 
-        .formatted-url {
-            color: #2196F3;
-            text-decoration: none;
+        .send-button:disabled {
+            opacity: 0.5;
+            transform: none;
+            cursor: not-allowed;
         }
 
-        .formatted-list-item {
-            margin-bottom: 5px;
-            padding-left: 1.5em;
-            text-indent: -1.5em;
-        }
-
-        .formatting-examples .format-example {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+        .floating-stats {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
             border-radius: 10px;
             padding: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: none;
         }
 
-        .formatting-examples .format-title {
-            color: white;
-            font-weight: bold;
-            margin-bottom: 5px;
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
         }
 
-        .formatting-examples .format-desc {
-            color: rgba(255, 255, 255, 0.7);
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @keyframes messageSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .messenger-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 200px;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            
+            .tools-section {
+                display: flex;
+                gap: 15px;
+                overflow-x: auto;
+                padding: 15px;
+            }
+            
+            .tool-category {
+                min-width: 200px;
+                margin-bottom: 0;
+            }
+        }
+
+        /* Enhanced message formatting */
+        .bot-message strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .bot-message code {
+            background: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .credit-message {
+            font-size: 11px;
+            color: #999;
+            font-style: italic;
+            border-top: 1px solid #eee;
+            padding-top: 8px;
+            margin-top: 8px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🧪 Bot Testing Lab</h1>
-            <p>Test your bot's AI responses in real-time</p>
-        </div>
-
-        <div class="nav-menu">
-            <div class="nav-links">
-                <a href="/" class="nav-link">📊 Dashboard</a>
-                <a href="/analytics" class="nav-link">📈 Analytics</a>
-                <a href="/users" class="nav-link">👥 Users</a>
-                <a href="/logs" class="nav-link">📋 Logs</a>
-                <a href="/settings" class="nav-link">⚙️ Settings</a>
-                <a href="/test" class="nav-link active">🧪 Test Bot</a>
+    <div class="messenger-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="sidebar-title">🤖 AI Assistant</h1>
+                <p class="sidebar-subtitle">Powered by Gemini Pro</p>
             </div>
-        </div>
-
-        <div class="test-stats">
-            <div class="test-stat">
-                <span class="test-stat-number" id="testCount">0</span>
-                <span class="test-stat-label">Tests Run</span>
-            </div>
-            <div class="test-stat">
-                <span class="test-stat-number" id="avgResponseTime">0ms</span>
-                <span class="test-stat-label">Avg Response</span>
-            </div>
-            <div class="test-stat">
-                <span class="test-stat-number" id="successRate">100%</span>
-                <span class="test-stat-label">Success Rate</span>
-            </div>
-        </div>
-
-        <div class="test-config">
-            <h3 style="color: white; margin-bottom: 15px;">🔧 Current Configuration</h3>
-            <div class="config-item">
-                <span>Auto Respond:</span>
-                <span class="config-value"><%= config.autoRespond ? '✅ Enabled' : '❌ Disabled' %></span>
-            </div>
-            <div class="config-item">
-                <span>Response Timeout:</span>
-                <span class="config-value"><%= config.responseTimeout / 1000 %>s</span>
-            </div>
-            <div class="config-item">
-                <span>Max Message Length:</span>
-                <span class="config-value"><%= config.maxMessageLength %> chars</span>
-            </div>
-        </div>
-
-        <div class="quick-tests">
-            <h3>⚡ Quick Test Messages</h3>
-            <div class="quick-test-buttons">
-                <button class="quick-test-btn" onclick="sendQuickTest('Hello! How are you?')">👋 Greeting</button>
-                <button class="quick-test-btn" onclick="sendQuickTest('What can you help me with?')">❓ Help</button>
-                <button class="quick-test-btn" onclick="sendQuickTest('Tell me a joke')">😄 Joke</button>
-                <button class="quick-test-btn" onclick="sendQuickTest('I am feeling sad today')">😢 Negative Sentiment</button>
-                <button class="quick-test-btn" onclick="sendQuickTest('This is amazing! I love it!')">🎉 Positive Sentiment</button>
-                <button class="quick-test-btn" onclick="sendQuickTest('Can you explain AI?')">🤖 AI Info</button>
-                <button class="quick-test-btn" onclick="sendQuickTest('I have a problem with my account')">🚨 Support Issue</button>
-                <button class="quick-test-btn" onclick="sendQuickTest('Thank you so much!')">🙏 Thanks</button>
-            </div>
-        </div>
-
-        <div class="test-config">
-            <h3 style="color: white; margin-bottom: 15px;">🔬 AI Analysis Features</h3>
-            <div id="aiAnalysis" style="display: none; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 15px;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-                    <div style="text-align: center;">
-                        <div style="color: #4CAF50; font-weight: bold;" id="detectedSentiment">-</div>
-                        <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Sentiment</div>
+            
+            <div class="tools-section">
+                <!-- Quick Actions -->
+                <div class="tool-category">
+                    <h3>⚡ Quick Actions</h3>
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" onclick="sendQuickMessage('👋 Hello! How are you today?')">
+                            👋 Say Hello
+                        </button>
+                        <button class="quick-action-btn" onclick="sendQuickMessage('❓ What can you help me with?')">
+                            ❓ Get Help
+                        </button>
+                        <button class="quick-action-btn" onclick="sendQuickMessage('😄 Tell me a funny joke!')">
+                            😄 Tell Joke
+                        </button>
+                        <button class="quick-action-btn" onclick="sendQuickMessage('🤖 Explain artificial intelligence')">
+                            🤖 AI Info
+                        </button>
+                        <button class="quick-action-btn" onclick="sendQuickMessage('💻 How do I learn programming?')">
+                            💻 Programming Help
+                        </button>
+                        <button class="quick-action-btn" onclick="sendQuickMessage('🌟 Give me some life advice')">
+                            🌟 Life Advice
+                        </button>
                     </div>
-                    <div style="text-align: center;">
-                        <div style="color: #2196F3; font-weight: bold;" id="detectedIntent">-</div>
-                        <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Intent</div>
+                </div>
+
+                <!-- YouTube Tools -->
+                <div class="tool-category">
+                    <h3>🎵 YouTube Tools</h3>
+                    <div class="youtube-section">
+                        <input type="text" class="youtube-input" id="youtubeUrl" placeholder="Paste YouTube URL here...">
+                        <div class="youtube-buttons">
+                            <button class="youtube-btn" onclick="downloadMP3()">🎵 MP3</button>
+                            <button class="youtube-btn" onclick="downloadVideo()">🎥 Video</button>
+                            <button class="youtube-btn" onclick="getVideoInfo()">ℹ️ Info</button>
+                        </div>
                     </div>
-                    <div style="text-align: center;">
-                        <div style="color: #ff9800; font-weight: bold;" id="responseLength">-</div>
-                        <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Response Length</div>
+                </div>
+
+                <!-- Stats -->
+                <div class="tool-category">
+                    <h3>📊 Chat Stats</h3>
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: rgba(255,255,255,0.8); font-size: 12px;">Messages:</span>
+                            <span style="color: white; font-weight: bold; font-size: 12px;" id="messageCount">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: rgba(255,255,255,0.8); font-size: 12px;">Avg Response:</span>
+                            <span style="color: white; font-weight: bold; font-size: 12px;" id="avgResponse">0ms</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: rgba(255,255,255,0.8); font-size: 12px;">Success Rate:</span>
+                            <span style="color: white; font-weight: bold; font-size: 12px;" id="successRate">100%</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="chat-container">
-            <div class="chat-messages" id="chatMessages">
-                <div class="message bot-message">
-                    👋 Hello! I'm your AI assistant powered by Gemini with **enhanced formatting**! 
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <div class="bot-avatar">🤖</div>
+                    <div class="bot-info">
+                        <h2>AI Assistant</h2>
+                        <div class="bot-status">● Online</div>
+                    </div>
+                </div>
+                <div class="chat-stats">
+                    <span>Response Time: <span id="lastResponseTime">-</span></span>
+                    <span>Status: <span style="color: #4CAF50;">Ready</span></span>
+                </div>
+            </div>
 
-                    Try these example prompts to see auto-formatting:
-
-                    🔸 **"What is JavaScript?"** (gets definition formatting)
-                    🔸 **"How to learn programming?"** (gets steps formatting) 
-                    🔸 **"Explain variables in Python"** (gets explanation formatting)
-                    🔸 **"Give me an example of a loop"** (gets example formatting)
-                    🔸 **"What are the pros and cons of React?"** (gets pros/cons formatting)
+            <div class="messages-container" id="messagesContainer">
+                <div class="message-group">
+                    <div class="message-bubble bot-message">
+                        🌟 <strong>Welcome to AI Assistant!</strong><br><br>
+                        I'm powered by <strong>Google Gemini Pro</strong> and ready to help you with:
+                        <br>• Answering questions
+                        <br>• Creative writing
+                        <br>• Problem solving
+                        <br>• YouTube downloads
+                        <br>• And much more!
+                        <br><br>
+                        <em>Try the quick actions on the left or just start typing! 😊</em>
+                        <div class="credit-message">💝 Created with 🤍 by Sunnel John Rebano</div>
+                    </div>
+                    <div class="message-time">Just now</div>
                 </div>
             </div>
 
@@ -305,168 +511,156 @@
                 </div>
             </div>
 
-            <div class="loading" id="loading">🤖 AI is thinking and formatting response...</div>
-
-            <div class="error" id="error"></div>
-
-            <div class="input-container">
-                <input type="text" class="message-input" id="messageInput" placeholder="Type your test message here..." maxlength="<%= config.maxMessageLength %>">
-                <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
-            </div>
-        </div>
-
-        <div class="formatting-examples" style="margin-top: 30px;">
-            <h3 style="color: white; margin-bottom: 15px;">✨ Auto-Formatting Features</h3>
-            <div class="formatting-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                <div class="format-example">
-                    <div class="format-title">📋 Answers</div>
-                    <div class="format-desc">Auto-detects "Answer:" and applies bold formatting</div>
-                </div>
-                <div class="format-example">
-                    <div class="format-title">💡 Explanations</div>
-                    <div class="format-desc">Auto-detects "Explanation:" and adds section dividers</div>
-                </div>
-                <div class="format-example">
-                    <div class="format-title">🔍 Examples</div>
-                    <div class="format-desc">Auto-detects "Example:" and highlights code</div>
-                </div>
-                <div class="format-example">
-                    <div class="format-title">📝 Steps</div>
-                    <div class="format-desc">Auto-detects numbered lists and procedures</div>
-                </div>
-                <div class="format-example">
-                    <div class="format-title">⚠️ Important Notes</div>
-                    <div class="format-desc">Auto-detects warnings and key information</div>
-                </div>
-                <div class="format-example">
-                    <div class="format-title">✅❌ Pros & Cons</div>
-                    <div class="format-desc">Auto-separates advantages and disadvantages</div>
+            <div class="input-area">
+                <div class="input-container">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Type your message..."
+                        rows="1"
+                        maxlength="<%= config.maxMessageLength %>"
+                    ></textarea>
+                    <button class="send-button" id="sendButton" onclick="sendMessage()">
+                        ➤
+                    </button>
                 </div>
             </div>
-        </div>
-
-        <div class="buttons">
-            <a href="/" class="btn btn-primary">← Back to Dashboard</a>
-            <button onclick="clearChat()" class="btn btn-success">🗑️ Clear Chat</button>
         </div>
     </div>
 
-    <script>
-        const chatMessages = document.getElementById('chatMessages');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const loading = document.getElementById('loading');
-        const typingIndicator = document.getElementById('typingIndicator');
-        const errorDiv = document.getElementById('error');
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
 
-        let testStats = {
+    <script>
+        let messageStats = {
             count: 0,
             totalResponseTime: 0,
             successCount: 0
         };
 
-        function addMessage(message, isUser = false, responseTime = null) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'} fade-in`;
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
 
-            const messageContent = document.createElement('div');
-
-            if (!isUser) {
-                // Apply enhanced formatting for bot messages
-                messageContent.innerHTML = formatBotMessage(message);
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+            
+            if (this.scrollHeight > 100) {
+                this.style.overflowY = 'auto';
             } else {
-                messageContent.textContent = message;
+                this.style.overflowY = 'hidden';
             }
+        });
 
-            messageDiv.appendChild(messageContent);
+        // Send message on Enter (Shift+Enter for new line)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
 
-            const timestamp = document.createElement('div');
-            timestamp.className = 'message-timestamp';
+        function addMessage(content, isUser = false, responseTime = null) {
+            const messageGroup = document.createElement('div');
+            messageGroup.className = 'message-group';
+
+            const messageBubble = document.createElement('div');
+            messageBubble.className = `message-bubble ${isUser ? 'user-message' : 'bot-message'}`;
 
             if (isUser) {
-                timestamp.textContent = new Date().toLocaleTimeString();
-            } else if (responseTime) {
-                timestamp.innerHTML = `${new Date().toLocaleTimeString()} • <span class="response-time">${responseTime}ms</span>`;
+                messageBubble.textContent = content;
             } else {
-                timestamp.textContent = new Date().toLocaleTimeString();
+                // Format bot message with credit
+                const parts = content.split('\n\n━━━━━━━━━━━━━━━━━━━━\n💝 Created with 🤍 by Sunnel John Rebano\n━━━━━━━━━━━━━━━━━━━━');
+                messageBubble.innerHTML = formatMessage(parts[0]);
+                
+                if (parts.length > 1) {
+                    const creditDiv = document.createElement('div');
+                    creditDiv.className = 'credit-message';
+                    creditDiv.innerHTML = '💝 Created with 🤍 by <strong>Sunnel John Rebano</strong>';
+                    messageBubble.appendChild(creditDiv);
+                }
             }
 
-            messageDiv.appendChild(timestamp);
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            
+            if (responseTime) {
+                timeDiv.textContent = `${new Date().toLocaleTimeString()} • ${responseTime}ms`;
+                document.getElementById('lastResponseTime').textContent = responseTime + 'ms';
+            } else {
+                timeDiv.textContent = new Date().toLocaleTimeString();
+            }
+
+            messageGroup.appendChild(messageBubble);
+            messageGroup.appendChild(timeDiv);
+            messagesContainer.appendChild(messageGroup);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        function formatBotMessage(message) {
-            // Convert markdown-style formatting to HTML
-            let formatted = message;
-
-            // Handle section dividers
-            formatted = formatted.replace(/━{10,}/g, '<hr class="content-divider">');
-
-            // Handle bold text (**text**)
+        function formatMessage(text) {
+            // Enhanced message formatting
+            let formatted = text;
+            
+            // Bold text
             formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-            // Handle code blocks (```code```)
-            formatted = formatted.replace(/```([\s\S]*?)```/g, '<div class="code-block">$1</div>');
-
-            // Handle inline code (`code`)
-            formatted = formatted.replace(/`([^`]+)`/g, '<span class="inline-code">$1</span>');
-
-            // Handle URLs
-            formatted = formatted.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" class="formatted-url" target="_blank">$1</a>');
-
-            // Handle bullet points
-            formatted = formatted.replace(/🔸\s+(.*?)(?=\n|$)/g, '<div class="formatted-list-item">$1</div>');
-
-            // Handle line breaks
+            
+            // Code blocks
+            formatted = formatted.replace(/```([\s\S]*?)```/g, '<pre style="background: #f1f3f4; padding: 10px; border-radius: 5px; overflow-x: auto;"><code>$1</code></pre>');
+            
+            // Inline code
+            formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // Line breaks
             formatted = formatted.replace(/\n/g, '<br>');
-
+            
+            // Section dividers
+            formatted = formatted.replace(/━{10,}/g, '<hr style="border: none; height: 1px; background: #eee; margin: 10px 0;">');
+            
             return formatted;
         }
 
-        function showError(message) {
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification show ${type}`;
+            
             setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
+                notification.classList.remove('show');
+            }, 3000);
         }
 
         function updateStats() {
-            document.getElementById('testCount').textContent = testStats.count;
-            document.getElementById('avgResponseTime').textContent = 
-                testStats.count > 0 ? Math.round(testStats.totalResponseTime / testStats.count) + 'ms' : '0ms';
+            document.getElementById('messageCount').textContent = messageStats.count;
+            document.getElementById('avgResponse').textContent = 
+                messageStats.count > 0 ? Math.round(messageStats.totalResponseTime / messageStats.count) + 'ms' : '0ms';
             document.getElementById('successRate').textContent = 
-                testStats.count > 0 ? Math.round(testStats.successCount / testStats.count * 100) + '%' : '100%';
+                messageStats.count > 0 ? Math.round(messageStats.successCount / messageStats.count * 100) + '%' : '100%';
         }
 
-        async function sendMessage(message = null) {
-            const testMessage = message || messageInput.value.trim();
-            if (!testMessage) return;
+        async function sendMessage() {
+            const content = messageInput.value.trim();
+            if (!content || sendButton.disabled) return;
 
-            // Add user message
-            addMessage(testMessage, true);
-            if (!message) messageInput.value = '';
-
-            // Show typing indicator
-            if (<%= config.enableTypingIndicator %>) {
-                typingIndicator.style.display = 'block';
-            } else {
-                loading.style.display = 'block';
-            }
-
-            sendBtn.disabled = true;
-            testStats.count++;
+            addMessage(content, true);
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            
+            sendButton.disabled = true;
+            typingIndicator.style.display = 'block';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
             const startTime = Date.now();
+            messageStats.count++;
 
             try {
                 const response = await fetch('/api/test-gemini', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ message: testMessage })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: content })
                 });
 
                 const data = await response.json();
@@ -474,87 +668,131 @@
 
                 if (data.success) {
                     addMessage(data.response, false, responseTime);
-                    testStats.successCount++;
-                    testStats.totalResponseTime += responseTime;
-
-                    // Show AI analysis if available
-                    if (data.analysis) {
-                        showAIAnalysis(data.analysis);
-                    }
+                    messageStats.successCount++;
+                    messageStats.totalResponseTime += responseTime;
                 } else {
                     addMessage(`❌ Error: ${data.error}`, false, responseTime);
-                    showError(data.error);
+                    showNotification(data.error, 'error');
                 }
             } catch (error) {
                 const responseTime = Date.now() - startTime;
-                addMessage('❌ Failed to connect to the bot. Please try again.', false, responseTime);
-                showError('Network error occurred');
+                addMessage('❌ Failed to connect. Please try again.', false, responseTime);
+                showNotification('Connection failed', 'error');
             } finally {
                 typingIndicator.style.display = 'none';
-                loading.style.display = 'none';
-                sendBtn.disabled = false;
+                sendButton.disabled = false;
                 messageInput.focus();
                 updateStats();
             }
         }
 
-        function sendQuickTest(message) {
-            sendMessage(message);
+        function sendQuickMessage(message) {
+            messageInput.value = message;
+            sendMessage();
         }
 
-        function clearChat() {
-            const messages = chatMessages.querySelectorAll('.message:not(:first-child)');
-            messages.forEach(msg => msg.remove());
+        // YouTube functionality
+        async function downloadMP3() {
+            const url = document.getElementById('youtubeUrl').value.trim();
+            if (!url) {
+                showNotification('Please enter a YouTube URL', 'error');
+                return;
+            }
 
-            testStats = {
-                count: 0,
-                totalResponseTime: 0,
-                successCount: 0
-            };
-            updateStats();
+            try {
+                showNotification('Starting MP3 download...', 'info');
+                const response = await fetch('/api/youtube-mp3', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = 'audio.mp3';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(downloadUrl);
+                    showNotification('MP3 download started!', 'success');
+                } else {
+                    const data = await response.json();
+                    showNotification(data.error || 'Download failed', 'error');
+                }
+            } catch (error) {
+                showNotification('Download failed: ' + error.message, 'error');
+            }
         }
 
-        // Enter key to send message
-        messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !sendBtn.disabled) {
-                sendMessage();
+        async function downloadVideo() {
+            const url = document.getElementById('youtubeUrl').value.trim();
+            if (!url) {
+                showNotification('Please enter a YouTube URL', 'error');
+                return;
             }
-        });
 
-        // Character counter
-        messageInput.addEventListener('input', function() {
-            const remaining = <%= config.maxMessageLength %> - this.value.length;
-            if (remaining < 50) {
-                this.style.borderColor = remaining < 0 ? '#f44336' : '#ff9800';
-            } else {
-                this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            try {
+                showNotification('Starting video download...', 'info');
+                const response = await fetch('/api/youtube-video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = 'video.mp4';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(downloadUrl);
+                    showNotification('Video download started!', 'success');
+                } else {
+                    const data = await response.json();
+                    showNotification(data.error || 'Download failed', 'error');
+                }
+            } catch (error) {
+                showNotification('Download failed: ' + error.message, 'error');
             }
-        });
+        }
 
-        function showAIAnalysis(analysis) {
-            const analysisDiv = document.getElementById('aiAnalysis');
-            const sentimentSpan = document.getElementById('detectedSentiment');
-            const intentSpan = document.getElementById('detectedIntent');
-            const lengthSpan = document.getElementById('responseLength');
+        async function getVideoInfo() {
+            const url = document.getElementById('youtubeUrl').value.trim();
+            if (!url) {
+                showNotification('Please enter a YouTube URL', 'error');
+                return;
+            }
 
-            // Update sentiment with color coding
-            sentimentSpan.textContent = analysis.sentiment.toUpperCase();
-            sentimentSpan.style.color = analysis.sentiment === 'positive' ? '#4CAF50' : 
-                                       analysis.sentiment === 'negative' ? '#f44336' : '#ff9800';
+            try {
+                const response = await fetch('/api/youtube-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
 
-            // Update intent
-            intentSpan.textContent = analysis.intent.toUpperCase();
-
-            // Update response length
-            lengthSpan.textContent = `${analysis.responseLength} chars`;
-
-            // Show the analysis
-            analysisDiv.style.display = 'block';
-
-            // Auto-hide after 10 seconds
-            setTimeout(() => {
-                analysisDiv.style.display = 'none';
-            }, 10000);
+                const data = await response.json();
+                if (data.success) {
+                    const video = data.video;
+                    const infoMessage = `🎥 **${video.title}**\n\n` +
+                        `👤 **Author:** ${video.author}\n` +
+                        `⏱️ **Duration:** ${Math.floor(video.duration / 60)}:${(video.duration % 60).toString().padStart(2, '0')}\n` +
+                        `👀 **Views:** ${parseInt(video.viewCount).toLocaleString()}\n\n` +
+                        `📝 **Description:** ${video.description}`;
+                    
+                    addMessage(infoMessage, false);
+                    showNotification('Video info retrieved!', 'success');
+                } else {
+                    showNotification(data.error || 'Failed to get info', 'error');
+                }
+            } catch (error) {
+                showNotification('Failed to get info: ' + error.message, 'error');
+            }
         }
 
         // Focus input on load
